@@ -113,13 +113,12 @@ function EditorPage() {
       "⚠️ CodeColab Runtime\n\nCurrently, CodeColab only supports executing JavaScript (Node.js) code.\n\nDo you want to proceed?"
     );
     
-    if (!userAgreed) return; // Stop execution if they click cancel
+    if (!userAgreed) return;
 
     setIsCompiling(true);
     setOutput("Executing code...\n");
 
     try {
-      // Send code to YOUR backend to bypass browser CORS
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/execute`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -128,21 +127,17 @@ function EditorPage() {
       
       const result = await response.json();
       
-      if (!response.ok) {
-        setOutput(`Execution Error: Unable to reach the execution server.`);
-        return;
-      }
-
-      // Handle Wandbox API Response
+      // If Wandbox responds with an error, the status flag is not "0"
       if (result.status !== "0") {
-        const errorOutput = result.program_error || result.compiler_error || "Unknown Error";
+        const errorOutput = result.program_error || result.compiler_error || result.message || "Unknown Error";
         const placeholderSuggestion = "Check your syntax for missing brackets or undefined variables. Ensure your code is valid JavaScript.";
         setOutput(`Error:\n${errorOutput}\n\n💡 Fix Suggestion:\n${placeholderSuggestion}`);
       } else {
+        // Output successful execution
         setOutput(result.program_message || "Execution finished with no output.");
       }
     } catch (err) {
-      console.error(err);
+      console.error("Frontend execution error:", err);
       setOutput("Failed to connect to execution server.");
     } finally {
       setIsCompiling(false);

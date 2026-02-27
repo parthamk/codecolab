@@ -7,7 +7,7 @@ const cors = require("cors");
 
 // Enable CORS for standard Express HTTP requests
 app.use(cors({
-  origin: "https://realtimecodecolab.onrender.com", // Your frontend domain
+  origin: "https://realtimecodecolab.onrender.com",
   methods: ["GET", "POST"]
 }));
 
@@ -29,21 +29,28 @@ app.post("/execute", async (req, res) => {
   const { code } = req.body;
   
   try {
-    // Wandbox is a fully free code execution API that requires no auth
     const response = await fetch("https://wandbox.org/api/compile.json", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        compiler: "nodejs-head", // Runs the latest Node.js version
+        compiler: "nodejs-16.14.0", // Use a stable, specific version to prevent "Unknown Compiler" errors
         code: code,
       }),
     });
     
-    const data = await response.json();
-    res.status(response.status).json(data);
+    // Safely parse the response in case Wandbox returns a plain text error instead of JSON
+    const text = await response.text();
+    try {
+      const data = JSON.parse(text);
+      res.status(response.status).json(data);
+    } catch (err) {
+      console.error("Wandbox returned non-JSON:", text);
+      // Return a structured JSON error to the frontend if parsing fails
+      res.status(400).json({ status: "1", program_error: text });
+    }
   } catch (error) {
     console.error("Execution error:", error);
-    res.status(500).json({ message: "Backend execution failed" });
+    res.status(500).json({ status: "1", program_error: "Backend execution failed" });
   }
 });
 
