@@ -5,48 +5,57 @@ const { Server } = require("socket.io");
 const ACTIONS = require("./Actions");
 const cors = require("cors");
 
-// Enable CORS for standard Express HTTP requests
 app.use(cors({
   origin: "https://realtimecodecolab.onrender.com",
   methods: ["GET", "POST"]
 }));
 
-// Middleware to parse incoming JSON payloads
 app.use(express.json());
 
 const server = http.createServer(app);
 
-// Configure Socket.io with CORS allowing your frontend origin
 const io = new Server(server, {
   cors: {
-    origin: "https://realtimecodecolab.onrender.com", 
+    origin: "https://realtimecodecolab.onrender.com",
     methods: ["GET", "POST"],
   },
 });
 
-// --- Proxy Code Execution using Wandbox API ---
+// ── Compiler map ──────────────────────────────────────────────────────────
+// Maps the frontend language key → valid Wandbox compiler ID.
+// Using *-head aliases keeps this working even as Wandbox updates versions.
+const COMPILER_MAP = {
+  "nodejs-20.17.0":    "nodejs-head",
+  "cpython-3.12.0":   "cpython-head",
+  "gcc-13.2.0-c":     "gcc-head-c",
+  "gcc-13.2.0":       "gcc-head",
+  "openjdk-jdk-21+35":"openjdk-head",
+  "rust-1.82.0":      "rust-head",
+};
+
+// ── Execute endpoint ──────────────────────────────────────────────────────
 app.post("/execute", async (req, res) => {
-  const { code, compiler } = req.body;
-  
+  const { code, compiler: langKey } = req.body;
+
+  // Translate the frontend key to a real Wandbox compiler ID
+  const wandboxCompiler = COMPILER_MAP[langKey] || langKey;
+
   try {
     const response = await fetch("https://wandbox.org/api/compile.json", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        // Uses the dynamic compiler passed from the frontend, defaults to Node 20
-        compiler: compiler || "nodejs-20.17.0", 
+        compiler: wandboxCompiler,
         code: code,
       }),
     });
-    
-    // Safely parse the response in case Wandbox returns a plain text error instead of JSON
+
     const text = await response.text();
     try {
       const data = JSON.parse(text);
       res.status(response.status).json(data);
     } catch (err) {
       console.error("Wandbox returned non-JSON:", text);
-      // Return a structured JSON error to the frontend if parsing fails
       res.status(400).json({ status: "1", program_error: text });
     }
   } catch (error) {
@@ -55,16 +64,14 @@ app.post("/execute", async (req, res) => {
   }
 });
 
+// ── Socket.IO ─────────────────────────────────────────────────────────────
 const userSocketMap = {};
+
 const getAllConnectedClients = (roomId) => {
-  return Array.from(io.sockets.adapter.rooms.get(roomId) || []).map(
-    (socketId) => {
-      return {
-        socketId,
-        username: userSocketMap[socketId],
-      };
-    }
-  );
+  return Array.from(io.sockets.adapter.rooms.get(roomId) || []).map((socketId) => ({
+    socketId,
+    username: userSocketMap[socketId],
+  }));
 };
 
 io.on("connection", (socket) => {
@@ -84,7 +91,7 @@ io.on("connection", (socket) => {
   socket.on(ACTIONS.CODE_CHANGE, ({ roomId, code }) => {
     socket.in(roomId).emit(ACTIONS.CODE_CHANGE, { code });
   });
-  
+
   socket.on(ACTIONS.SYNC_CODE, ({ socketId, code }) => {
     io.to(socketId).emit(ACTIONS.CODE_CHANGE, { code });
   });
@@ -97,7 +104,6 @@ io.on("connection", (socket) => {
         username: userSocketMap[socket.id],
       });
     });
-
     delete userSocketMap[socket.id];
     socket.leave();
   });
