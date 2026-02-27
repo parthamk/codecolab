@@ -112,26 +112,24 @@ function EditorPage() {
     setOutput("Executing code...\n");
 
     try {
-      // Sending code to execution sandbox
-      const response = await fetch("https://emkc.org/api/v2/piston/execute", {
+      // Send code to YOUR backend, not directly to Piston
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/execute`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          language: "javascript",
-          version: "18.15.0",
-          files: [{ content: codeContent }],
-        }),
+        body: JSON.stringify({ code: codeContent }),
       });
+      
       const result = await response.json();
       
+      // Safety check: Prevent app crash if API is down or returns an error
+      if (!response.ok || !result.run) {
+        setOutput(`Execution Error: ${result.message || "Unable to run code at this time."}`);
+        return;
+      }
+
+      // Check if the code itself produced an error during execution
       if (result.run.code !== 0) {
         const errorOutput = result.run.output;
-        setOutput(`Error:\n${errorOutput}\n\nAnalyzing error...`);
-        
-        // --- AI Suggestion Call ---
-        // Pass 'errorOutput' to an AI API endpoint (e.g., your own backend hitting the Gemini API)
-        // const suggestion = await fetchAISuggestion(errorOutput); 
-        
         const placeholderSuggestion = "Make sure all variables are defined and syntax is correct based on the JSHint warnings in the editor.";
         setOutput(`Error:\n${errorOutput}\n\n💡 Fix Suggestion:\n${placeholderSuggestion}`);
       } else {
