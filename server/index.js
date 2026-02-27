@@ -19,77 +19,16 @@ const io = new Server(server, {
   },
 });
 
-// ── Fetch Wandbox compiler list at startup and pick best match ────────────
-// Maps our frontend language key → search keywords to find the right compiler
-const LANG_SEARCH = {
-  "nodejs-20.17.0":    { lang: "JavaScript",  prefer: ["nodejs"] },
-  "cpython-3.12.0":   { lang: "Python",       prefer: ["cpython"] },
-  "gcc-13.2.0-c":     { lang: "C",            prefer: ["gcc-c", "gcc"] },   // C-specific
-  "gcc-13.2.0":       { lang: "C++",          prefer: ["gcc"] },
-  "openjdk-jdk-21+35":{ lang: "Java",         prefer: ["openjdk", "java"] },
-  "rust-1.82.0":      { lang: "Rust",         prefer: ["rust"] },
-};
-
-let COMPILER_MAP = {}; // will be populated at startup
-
-async function buildCompilerMap() {
-  try {
-    const res = await fetch("https://wandbox.org/api/list.json");
-    const list = await res.json(); // array of compiler objects
-
-    for (const [frontendKey, { lang, prefer }] of Object.entries(LANG_SEARCH)) {
-      // Filter compilers matching this language
-      const candidates = list.filter(c =>
-        c.language && c.language.toLowerCase() === lang.toLowerCase()
-      );
-
-      if (candidates.length === 0) {
-        console.warn(`No Wandbox compiler found for language: ${lang}`);
-        continue;
-      }
-
-      // Try each preferred keyword in order; pick first match
-      let chosen = null;
-      for (const kw of prefer) {
-        chosen = candidates.find(c => c.name && c.name.toLowerCase().includes(kw));
-        if (chosen) break;
-      }
-
-      // Fallback: just use the first candidate
-      if (!chosen) chosen = candidates[0];
-
-      COMPILER_MAP[frontendKey] = chosen.name;
-      console.log(`  ${frontendKey} → ${chosen.name}`);
-    }
-
-    console.log("Wandbox compiler map ready:", COMPILER_MAP);
-  } catch (err) {
-    console.error("Failed to fetch Wandbox compiler list, using hardcoded fallback:", err.message);
-
-    // Hardcoded fallback — best known values as of early 2025
-    COMPILER_MAP = {
-      "nodejs-20.17.0":    "nodejs-head",
-      "cpython-3.12.0":   "cpython-3.12.0",
-      "gcc-13.2.0-c":     "gcc-head-c",
-      "gcc-13.2.0":       "gcc-head",
-      "openjdk-jdk-21+35":"openjdk-head",
-      "rust-1.82.0":      "rust-head",
-    };
-  }
-}
-
-// ── Execute endpoint ──────────────────────────────────────────────────────
+// Execute endpoint — compiler keys are sent directly from frontend and must
+// exactly match Wandbox's compiler names from /api/list.json
 app.post("/execute", async (req, res) => {
-  const { code, compiler: langKey } = req.body;
-  const wandboxCompiler = COMPILER_MAP[langKey] || langKey;
-
-  console.log(`Running [${langKey}] → wandbox compiler: [${wandboxCompiler}]`);
+  const { code, compiler } = req.body;
 
   try {
     const response = await fetch("https://wandbox.org/api/compile.json", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ compiler: wandboxCompiler, code }),
+      body: JSON.stringify({ compiler, code }),
     });
 
     const text = await response.text();
@@ -106,10 +45,7 @@ app.post("/execute", async (req, res) => {
   }
 });
 
-// ── Debug endpoint: see the live compiler map ─────────────────────────────
-app.get("/compilers", (req, res) => res.json(COMPILER_MAP));
-
-// ── Socket.IO ─────────────────────────────────────────────────────────────
+// Socket.IO
 const userSocketMap = {};
 
 const getAllConnectedClients = (roomId) =>
@@ -148,9 +84,5 @@ io.on("connection", (socket) => {
   });
 });
 
-// ── Start: fetch compiler map first, then listen ──────────────────────────
 const PORT = process.env.PORT || 5000;
-
-buildCompilerMap().then(() => {
-  server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-});
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

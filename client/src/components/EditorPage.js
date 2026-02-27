@@ -8,7 +8,7 @@ import { toast } from "react-hot-toast";
 
 const boilerplates = {
   "nodejs-20.17.0":   '// JavaScript (Node.js)\nconsole.log("Hello, World!");',
-  "cpython-3.12.0":   '# Python\nprint("Hello, World!")',
+  "cpython-3.12.7":   '# Python\nprint("Hello, World!")',
   "gcc-13.2.0-c":     '// C\n#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}',
   "gcc-13.2.0":       '// C++\n#include <iostream>\n\nint main() {\n    std::cout << "Hello, World!" << std::endl;\n    return 0;\n}',
   "openjdk-jdk-21+35":'// Java\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}',
@@ -148,7 +148,7 @@ function EditorPage() {
   };
 
   const downloadCode = () => {
-    const ext = { "nodejs-20.17.0": "js", "cpython-3.12.0": "py", "gcc-13.2.0-c": "c", "gcc-13.2.0": "cpp", "openjdk-jdk-21+35": "java", "rust-1.82.0": "rs" }[language] || "txt";
+    const ext = { "nodejs-20.17.0": "js", "cpython-3.12.7": "py", "gcc-13.2.0-c": "c", "gcc-13.2.0": "cpp", "openjdk-jdk-21+35": "java", "rust-1.82.0": "rs" }[language] || "txt";
     const blob = new Blob([codeRef.current], { type: "text/plain" });
     const link = document.body.appendChild(document.createElement("a"));
     link.href = URL.createObjectURL(blob);
@@ -197,7 +197,7 @@ function EditorPage() {
           <div className="editor-toolbar">
             <select className="editor-lang-select" value={language} onChange={handleLanguageChange}>
               <option value="nodejs-20.17.0">JavaScript (Node.js)</option>
-              <option value="cpython-3.12.0">Python</option>
+              <option value="cpython-3.12.7">Python</option>
               <option value="gcc-13.2.0-c">C</option>
               <option value="gcc-13.2.0">C++ (GCC)</option>
               <option value="openjdk-jdk-21+35">Java</option>
