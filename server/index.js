@@ -6,11 +6,17 @@ const ACTIONS = require("./Actions");
 
 const server = http.createServer(app);
 
-const io = new Server(server);
+// Configure Socket.io with CORS allowing your frontend origin
+const io = new Server(server, {
+  cors: {
+    origin: "https://realtimecodecolab.onrender.com" || "http://localhost:3000", // Allows your frontend domain
+    methods: ["GET", "POST"],
+  },
+});
 
 const userSocketMap = {};
 const getAllConnectedClients = (roomId) => {
-  return Array.from(io.sockets.adapter.rooms.get(roomId) || []).map(
+  return Array.from(io.sockets.adapter.rooms.get(roomId) ?? []).map(
     (socketId) => {
       return {
         socketId,
@@ -40,6 +46,7 @@ io.on("connection", (socket) => {
   socket.on(ACTIONS.CODE_CHANGE, ({ roomId, code }) => {
     socket.in(roomId).emit(ACTIONS.CODE_CHANGE, { code });
   });
+  
   // when new user join the room all the code which are there are also shows on that persons editor
   socket.on(ACTIONS.SYNC_CODE, ({ socketId, code }) => {
     io.to(socketId).emit(ACTIONS.CODE_CHANGE, { code });
@@ -62,4 +69,4 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`Server is runnint on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
