@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 
 const NEON_COLORS = [
   ['#9b30ff', '#6010d0'],
@@ -21,8 +22,31 @@ function getColorPair(name) {
 
 function Client({ username }) {
   const [hovered, setHovered] = useState(false);
+  const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
+  const avatarRef = useRef(null);
   const initial = username ? username.charAt(0).toUpperCase() : '?';
   const [from, to] = useMemo(() => getColorPair(username || ''), [username]);
+
+  useEffect(() => {
+    if (hovered && avatarRef.current) {
+      const rect = avatarRef.current.getBoundingClientRect();
+      setTooltipPos({
+        top: rect.top + rect.height / 2,      // vertically centered on avatar
+        left: rect.right + 10,                 // 10px to the right of avatar
+      });
+    }
+  }, [hovered]);
+
+  const tooltip = hovered ? ReactDOM.createPortal(
+    <div
+      className="client-tooltip"
+      style={{ top: tooltipPos.top, left: tooltipPos.left }}
+    >
+      {username}
+      <div className="client-tooltip-arrow" />
+    </div>,
+    document.body
+  ) : null;
 
   return (
     <div
@@ -31,6 +55,7 @@ function Client({ username }) {
       onMouseLeave={() => setHovered(false)}
     >
       <div
+        ref={avatarRef}
         className="client-avatar"
         style={{
           background: `linear-gradient(135deg, ${from}, ${to})`,
@@ -39,13 +64,7 @@ function Client({ username }) {
       >
         {initial}
       </div>
-
-      {hovered && (
-        <div className="client-tooltip">
-          {username}
-          <div className="client-tooltip-arrow" />
-        </div>
-      )}
+      {tooltip}
     </div>
   );
 }
