@@ -1,0 +1,1014 @@
+codecolab/
+|
+-client/
+  |
+  -.gitignore
+  |
+  -public/
+    |
+    -favicon.ico
+    |
+    -images/
+      |
+      -codecast.png
+      |
+      -logo.png
+    |
+    -index.html
+    |
+    -logo192.png
+    |
+    -logo512.png
+    |
+    -manifest.json
+    |
+    -robots.txt
+  |
+  -README.md
+  |
+  -src/
+    |
+    -Actions.js
+    |
+    -App.css
+    |
+    -App.js
+    |
+    -App.test.js
+    |
+    -components/
+      |
+      -Client.js
+      |
+      -Editor.js
+      |
+      -EditorPage.js
+      |
+      -Home.js
+    |
+    -index.css
+    |
+    -index.js
+    |
+    -reportWebVitals.js
+    |
+    -setupTests.js
+    |
+    -Socket.js
+|
+-README.md
+|
+-server/
+  |
+  -.gitignore
+  |
+  -Actions.js
+  |
+  -index.js
+
+codecolab/client/.gitignore:
+----------------------------
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
+codecolab/client/public/index.html:
+-----------------------------------
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Web site created using create-react-app" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <title>CodeColab</title>
+  </head>
+  <body style="background-color: #1c1e29;">
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jshint/2.13.6/jshint.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossOrigin="anonymous"></script>
+  </body>
+</html>
+
+codecolab/client/public/manifest.json:
+--------------------------------------
+{
+  "short_name": "React App",
+  "name": "Create React App Sample",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
+
+
+codecolab/client/public/robots.txt:
+-----------------------------------
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Disallow:
+
+
+codecolab/client/README.md:
+---------------------------
+# Getting Started with Create React App
+
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+## Available Scripts
+
+In the project directory, you can run:
+
+### `npm start`
+
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
+
+### `npm test`
+
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+
+### `npm run build`
+
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
+
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
+
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+
+### `npm run eject`
+
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).
+
+### Code Splitting
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+
+### Analyzing the Bundle Size
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+
+### Making a Progressive Web App
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+
+### Advanced Configuration
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `npm run build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+codecolab/client/src/Actions.js:
+--------------------------------
+// All the events
+
+export const ACTIONS = {
+  JOIN: "join",
+  JOINED: "joined",
+  DISCONNECTED: "disconnected",
+  CODE_CHANGE: "conde-change",
+  SYNC_CODE: "sync-code",
+  LEAVE: "leave",
+  CURSOR_ACTIVITY: "cursor-activity",
+  TEXT_HIGHLIGHT: "text-highlight",
+};
+
+
+codecolab/client/src/App.css:
+-----------------------------
+.codemirror{
+   
+        min-height: 'calc(100vh -20px)';
+        font-size: '20px';
+        line-height: '1.6';
+        padding-top: '20px';
+}
+.highlighted-text { background-color: yellow; }
+
+
+codecolab/client/src/App.js:
+----------------------------
+import './App.css';
+import { Routes, Route } from "react-router-dom";
+import Home from './components/Home';
+import EditorPage from './components/EditorPage';
+import { Toaster } from 'react-hot-toast';
+
+function App() {
+  return (
+    <>
+    <div>
+      <Toaster  position='top-center'></Toaster>
+    </div>
+    <Routes>
+     <Route path='/' element={ <Home /> } />
+     <Route path='/editor/:roomId' element={ <EditorPage /> } />
+    </Routes>
+    </>
+  );
+}
+
+export default App;
+
+
+codecolab/client/src/App.test.js:
+---------------------------------
+import { render, screen } from '@testing-library/react';
+import App from './App';
+
+test('renders learn react link', () => {
+  render(<App />);
+  const linkElement = screen.getByText(/learn react/i);
+  expect(linkElement).toBeInTheDocument();
+});
+
+
+codecolab/client/src/components/Client.js:
+------------------------------------------
+import React from 'react';
+import Avatar from 'react-avatar';
+
+function Client({username}) {
+
+  return (
+    <div className="d-flex align-items-center mb-3">
+      <Avatar name={username.toString()} size={50} round="14px" className="mr-3" />
+      <span className='mx-2'>{username.toString()}</span>
+    </div>
+  );
+}
+
+export default Client;
+
+
+codecolab/client/src/components/Editor.js:
+------------------------------------------
+import React, { useEffect, useRef } from "react";
+import CodeMirror from "codemirror";
+import "codemirror/lib/codemirror.css";
+import "codemirror/theme/dracula.css";
+
+// Modes
+import "codemirror/mode/javascript/javascript";
+import "codemirror/mode/python/python";
+import "codemirror/mode/clike/clike"; // Handles C, C++, and Java
+import "codemirror/mode/rust/rust";
+
+// Addons
+import "codemirror/addon/edit/closetag";
+import "codemirror/addon/edit/closebrackets";
+import "codemirror/addon/hint/show-hint.css";
+import "codemirror/addon/hint/show-hint";
+import "codemirror/addon/hint/javascript-hint";
+import "codemirror/addon/hint/anyword-hint";
+import "codemirror/addon/lint/lint.css";
+import "codemirror/addon/lint/lint";
+import "codemirror/addon/lint/javascript-lint";
+
+import { ACTIONS } from "../Actions";
+
+const Editor = ({ socketRef, roomId, onCodeChange, username, language }) => {
+  const editorRef = useRef(null);
+
+  // Helper to map Wandbox compilers to CodeMirror modes
+  const getMode = (lang) => {
+    if (lang.includes("nodejs")) return "javascript";
+    if (lang.includes("python")) return "python";
+    if (lang.includes("gcc")) return "text/x-c++src";
+    if (lang.includes("openjdk")) return "text/x-java";
+    if (lang.includes("rust")) return "rust";
+    return "javascript";
+  };
+
+  useEffect(() => {
+    const initEditor = () => {
+      editorRef.current = CodeMirror.fromTextArea(
+        document.getElementById("realtimeEditor"),
+        {
+          mode: getMode(language),
+          theme: "dracula",
+          autoCloseTags: true,
+          autoCloseBrackets: true,
+          lineNumbers: true,
+          extraKeys: { "Ctrl-Space": "autocomplete" },
+          gutters: ["CodeMirror-lint-markers"],
+          // Only enable linting for JavaScript since we have JSHint loaded
+          lint: language.includes("nodejs"), 
+        }
+      );
+
+      editorRef.current.setSize(null, "100%");
+      editorRef.current.on("change", (instance, changes) => {
+        const { origin } = changes;
+        const code = instance.getValue();
+        onCodeChange(code);
+        if (origin !== "setValue") {
+          socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, code });
+        }
+      });
+    };
+
+    if (!editorRef.current) initEditor();
+  }, []);
+
+  // Update mode and linting dynamically when the dropdown changes
+  useEffect(() => {
+    if (editorRef.current) {
+      const newMode = getMode(language);
+      editorRef.current.setOption("mode", newMode);
+      
+      // Toggle JSHint based on whether the language is JavaScript
+      editorRef.current.setOption("lint", language.includes("nodejs"));
+    }
+  }, [language]);
+
+  useEffect(() => {
+    if (socketRef.current) {
+      socketRef.current.on(ACTIONS.CODE_CHANGE, ({ code }) => {
+        if (code !== null && editorRef.current.getValue() !== code) {
+          editorRef.current.setValue(code);
+        }
+      });
+    }
+    return () => socketRef.current?.off(ACTIONS.CODE_CHANGE);
+  }, [socketRef]);
+
+  return (
+    <div style={{ height: "100%" }}>
+      <textarea id="realtimeEditor"></textarea>
+    </div>
+  );
+};
+
+export default Editor;
+
+codecolab/client/src/components/EditorPage.js:
+----------------------------------------------
+import React, { useEffect, useRef, useState } from "react";
+import Client from "./Client";
+import Editor from "./Editor";
+import { initSocket } from "../Socket";
+import { ACTIONS } from "../Actions";
+import { useNavigate, useLocation, Navigate, useParams } from "react-router-dom";
+import { toast } from "react-hot-toast";
+
+const boilerplates = {
+  "nodejs-20.17.0": 'console.log("Hello from JavaScript!");',
+  "cpython-3.12.0": 'print("Hello from Python!")',
+  "gcc-13.2.0-c": '#include <stdio.h>\n\nint main() {\n    printf("Hello from C!\\n");\n    return 0;\n}',
+  "gcc-13.2.0": '#include <iostream>\n\nint main() {\n    std::cout << "Hello from C++!" << std::endl;\n    return 0;\n}',
+  "openjdk-jdk-21+35": 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello from Java!");\n    }\n}',
+  "rust-1.82.0": 'fn main() {\n    println!("Hello from Rust!");\n}',
+};
+
+function EditorPage() {
+  const [clients, setClients] = useState([]);
+  const [output, setOutput] = useState("");
+  const [isCompiling, setIsCompiling] = useState(false);
+  const [language, setLanguage] = useState("nodejs-20.17.0");
+  const [showServerWarning, setShowServerWarning] = useState(true);
+  
+  const codeRef = useRef(boilerplates["nodejs-20.17.0"]); // Initial default boilerplate
+  const socketRef = useRef(null);
+  const { roomId } = useParams();
+  const Location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const init = async () => {
+      socketRef.current = await initSocket();
+      socketRef.current.emit(ACTIONS.JOIN, {
+        roomId,
+        username: Location.state?.username,
+      });
+
+      socketRef.current.on(ACTIONS.JOINED, ({ clients, username, socketId }) => {
+        if (username !== Location.state?.username) {
+          toast.success(`${username} joined.`);
+        }
+        setClients(clients);
+        socketRef.current.emit(ACTIONS.SYNC_CODE, { code: codeRef.current, socketId });
+      });
+
+      socketRef.current.on(ACTIONS.DISCONNECTED, ({ username, socketId }) => {
+        toast.success(`${username} left.`);
+        setClients((prev) => prev.filter((c) => c.socketId !== socketId));
+      });
+    };
+    init();
+    return () => socketRef.current?.disconnect();
+  }, [roomId, Location.state?.username]);
+
+  // Handle language change and update boilerplate
+  const handleLanguageChange = (e) => {
+    const newLang = e.target.value;
+    const currentCode = codeRef.current;
+
+    // Only overwrite with boilerplate if the editor is empty or contains another boilerplate
+    const isDefaultCode = Object.values(boilerplates).some(b => b.trim() === currentCode.trim()) || currentCode.trim() === "";
+    
+    if (isDefaultCode) {
+      const newBoilerplate = boilerplates[newLang];
+      codeRef.current = newBoilerplate;
+      // Emit the change so other users see the new boilerplate
+      socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, code: newBoilerplate });
+      // Note: Editor component will pick this up via the socket listener
+    }
+    
+    setLanguage(newLang);
+  };
+
+  const runCode = async () => {
+    setIsCompiling(true);
+    setOutput("Executing code...\n");
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/execute`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: codeRef.current, compiler: language }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.status !== "0") {
+        const errorOutput = result.program_error || result.compiler_error || result.message || "Unknown Error";
+        
+        // --- Improved Language-Specific Suggestions ---
+        let suggestion = "Check for missing semicolons, brackets, or undefined variables.";
+        if (language.includes("python") && errorOutput.includes("IndentationError")) {
+          suggestion = "Fix the indentation of your blocks. Python relies on consistent spacing.";
+        } else if (language.includes("gcc") && errorOutput.includes("main")) {
+          suggestion = "Ensure you have a valid 'int main()' function defined.";
+        } else if (language.includes("openjdk") && !codeRef.current.includes("public class Main")) {
+          suggestion = "In this environment, your class must be named 'Main'.";
+        }
+
+        setOutput(`Error:\n${errorOutput}\n\n💡 Fix Suggestion:\n${suggestion}`);
+      } else {
+        setOutput(result.program_message || "Execution finished with no output.");
+      }
+    } catch (err) {
+      setOutput("Failed to connect to execution server.");
+    } finally {
+      setIsCompiling(false);
+    }
+  };
+
+  if (!Location.state) return <Navigate to="/" />;
+
+  return (
+    <div className="container-fluid vh-100 position-relative">
+      {showServerWarning && (
+        <div className="fixed-bottom mb-4 mx-auto text-center" style={{ zIndex: 9999 }}>
+            <div className="bg-dark text-white p-3 rounded-pill d-inline-block shadow border border-secondary" style={{ maxWidth: "90%" }}>
+                <span className="me-3">⚠️ Website may face server issues. Refresh and try again if it disconnects.</span>
+                <button className="btn btn-sm btn-light rounded-pill px-4 fw-bold" onClick={() => setShowServerWarning(false)}>OK</button>
+            </div>
+        </div>
+      )}
+
+      <div className="row h-100">
+        <div className="col-md-2 bg-light d-flex flex-column h-100 p-3 shadow-sm">
+          <div className="flex-grow-1 overflow-auto">
+            <h5 className="mb-3 border-bottom pb-2">Members</h5>
+            {clients.map((c) => <Client key={c.socketId} username={c.username} />)}
+          </div>
+          <div className="mt-auto d-flex flex-column gap-2">
+            <button className="btn btn-success" onClick={() => {
+                navigator.clipboard.writeText(roomId);
+                toast.success("Room ID copied");
+            }}>Copy Room ID</button>
+            <button className="btn btn-primary" onClick={() => {
+                 const blob = new Blob([codeRef.current], { type: "text/plain" });
+                 const link = document.body.appendChild(document.createElement("a"));
+                 link.href = URL.createObjectURL(blob);
+                 link.download = `code-${roomId}.txt`;
+                 link.click();
+                 document.body.removeChild(link);
+            }}>Download Code</button>
+            <button className="btn btn-danger" onClick={() => navigate("/")}>Leave Room</button>
+          </div>
+        </div>
+
+        <div className="col-md-10 d-flex flex-column h-100 p-0">
+          <div className="d-flex justify-content-end align-items-center p-2 bg-secondary border-bottom">
+            <select 
+              className="form-select w-auto me-3 fw-bold bg-dark text-white border-secondary" 
+              value={language} 
+              onChange={handleLanguageChange}
+            >
+              <option value="nodejs-20.17.0">JavaScript (Node.js)</option>
+              <option value="cpython-3.12.0">Python</option>
+              <option value="gcc-13.2.0-c">C</option>
+              <option value="gcc-13.2.0">C++ (GCC)</option>
+              <option value="openjdk-jdk-21+35">Java</option>
+              <option value="rust-1.82.0">Rust</option>
+            </select>
+            <button className="btn btn-warning px-4 fw-bold" onClick={runCode} disabled={isCompiling}>
+              {isCompiling ? "Running..." : "Run Code"}
+            </button>
+          </div>
+
+          <div className="flex-grow-1 overflow-auto" style={{ height: "70%" }}>
+            <Editor
+              socketRef={socketRef}
+              roomId={roomId}
+              username={Location.state?.username}
+              language={language}
+              onCodeChange={(code) => { codeRef.current = code; }}
+            />
+          </div>
+
+          <div className="bg-dark text-white p-3" style={{ height: "30%", borderTop: "2px solid #555", overflowY: "auto" }}>
+            <h6 className="text-secondary mb-2">Output Console</h6>
+            <pre style={{ whiteSpace: "pre-wrap", fontSize: "14px" }}>
+              {output || "Run code to see output..."}
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default EditorPage;
+
+codecolab/client/src/components/Home.js:
+----------------------------------------
+import React, { useState } from "react";
+import { v4 as uuid } from "uuid";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+
+function Home() {
+  const [roomId, setRoomId] = useState("");
+  const [username, setUsername] = useState("");
+
+  const navigate = useNavigate();
+
+  const generateRoomId = (e) => {
+    e.preventDefault();
+    const Id = uuid();
+    setRoomId(Id);
+    toast.success("Room Id is generated");
+  };
+
+  const joinRoom = () => {
+    if (!roomId || !username) {
+      toast.error("Both the field is requried");
+      return;
+    }
+
+    // redirect
+    navigate(`/editor/${roomId}`, {
+      state: {
+        username,
+      },
+    });
+    toast.success("room is created");
+  };
+
+  // when enter then also join
+  const handleInputEnter = (e) => {
+    if (e.code === "Enter") {
+      joinRoom();
+    }
+  };
+
+  return (
+    <div className="container-fluid bg-light">
+      <div className="row justify-content-center align-items-center min-vh-100">
+        <div className="col-12 col-md-6">
+          <div className="card shadow-sm p-2 mb-5 bg-black rounded">
+            <div className="card-body text-center bg-light">
+              {/* <img
+                src="/images/codecast.png"
+                alt="Logo"
+                className="img-fluid mx-auto d-block"
+                style={{ maxWidth: "150px", filter: "invert(75%)" }}
+              /> */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                style={{ width: "48px", height: "48px" }}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25"
+                />
+              </svg>
+              <p>Code Colab</p>
+
+              <h4 className="card-title text-dark mb-4">Enter the ROOM ID</h4>
+
+              <div className="form-group">
+                <input
+                  type="text"
+                  value={roomId}
+                  onChange={(e) => setRoomId(e.target.value)}
+                  className="form-control mb-2"
+                  placeholder="ROOM ID"
+                  onKeyUp={handleInputEnter}
+                />
+              </div>
+              <div className="form-group">
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="form-control mb-2"
+                  placeholder="USERNAME"
+                  onKeyUp={handleInputEnter}
+                />
+              </div>
+              <button
+                onClick={joinRoom}
+                className="btn btn-success btn-lg btn-block"
+              >
+                JOIN
+              </button>
+              <p className="mt-3 text-dark">
+                Don't have a room ID? create{" "}
+                <span
+                  onClick={generateRoomId}
+                  className=" text-success p-2"
+                  style={{ cursor: "pointer" }}
+                >
+                  {" "}
+                  New Room
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Home;
+
+
+codecolab/client/src/index.css:
+-------------------------------
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* background: #1c1e29; */
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+codecolab/client/src/index.js:
+------------------------------
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+import reportWebVitals from './reportWebVitals';
+import "bootstrap/dist/css/bootstrap.min.css";
+import { BrowserRouter as Router } from "react-router-dom";
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <Router>
+    <App />
+  </Router>
+);
+
+
+reportWebVitals();
+
+
+codecolab/client/src/reportWebVitals.js:
+----------------------------------------
+const reportWebVitals = onPerfEntry => {
+  if (onPerfEntry && onPerfEntry instanceof Function) {
+    import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+      getCLS(onPerfEntry);
+      getFID(onPerfEntry);
+      getFCP(onPerfEntry);
+      getLCP(onPerfEntry);
+      getTTFB(onPerfEntry);
+    });
+  }
+};
+
+export default reportWebVitals;
+
+
+codecolab/client/src/setupTests.js:
+-----------------------------------
+// jest-dom adds custom jest matchers for asserting on DOM nodes.
+// allows you to do things like:
+// expect(element).toHaveTextContent(/react/i)
+// learn more: https://github.com/testing-library/jest-dom
+import '@testing-library/jest-dom';
+
+
+codecolab/client/src/Socket.js:
+-------------------------------
+import {io} from 'socket.io-client';
+
+export const initSocket = async () =>{
+    const options = {
+        'force new connection': true,
+        reconnectionAttempts : 'Infinity',
+        timeout: 180000,
+        transports: ['polling', 'websocket'],
+    };
+    return io(process.env.REACT_APP_BACKEND_URL, options);
+}
+
+codecolab/README.md:
+--------------------
+
+# Realtime Collaborative Text Editor
+
+Welcome to the Realtime Collaborative Text Editor project! This application allows multiple users to collaborate on editing a text document in real-time. Users can see each other's cursors, highlight text, and experience seamless collaboration.
+
+## Installation
+
+### Frontend
+
+1. Navigate to the `client` directory.
+2. Run `npm install` to install all frontend dependencies.
+
+### Backend
+
+1. Navigate to the `server` directory.
+2. Run `npm install` to install all backend dependencies.
+
+## Running the Project
+
+1. Start the backend server:
+
+   - Navigate to the `server` directory.
+   - Run `npm start` to start the server.
+2. Start the frontend development server:
+
+   - Navigate to the `client` directory.
+   - Run `npm start` to start the frontend server.
+3. Access the application in your browser at `http://localhost:3000`.
+
+## Implementations
+
+- Real-time collaboration using Socket.IO.
+- Cursor synchronization to show other users' cursor positions.
+- Text highlighting for collaborative editing.
+- User authentication (optional) for secure access.
+- Conflict resolution strategies for simultaneous editing.
+
+## Learnings
+
+Throughout this project, I've gained insights into:
+
+- Implementing real-time features using WebSocket communication.
+- Managing user presence and interactions in a collaborative environment.
+- Handling conflicts and ensuring data consistency in collaborative editing scenarios.
+- Integrating rich text editors and UI components for a seamless user experience.
+
+## Additional Notes
+
+- Ensure Node.js and npm are installed on your machine before running the project.
+- For production deployment, consider configuring environment variables and securing the application.
+
+Feel free to explore and contribute to this project. Happy collaborating!
+
+
+codecolab/server/.gitignore:
+----------------------------
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
+codecolab/server/Actions.js:
+----------------------------
+// All the events
+
+const ACTIONS = {
+  JOIN: "join",
+  JOINED: "joined",
+  DISCONNECTED: "disconnected",
+  CODE_CHANGE: "conde-change",
+  SYNC_CODE: "sync-code",
+  LEAVE: "leave",
+};
+
+module.exports = ACTIONS;
+
+
+codecolab/server/index.js:
+--------------------------
+const express = require("express");
+const app = express();
+const http = require("http");
+const { Server } = require("socket.io");
+const ACTIONS = require("./Actions");
+const cors = require("cors");
+
+// Enable CORS for standard Express HTTP requests
+app.use(cors({
+  origin: "https://realtimecodecolab.onrender.com",
+  methods: ["GET", "POST"]
+}));
+
+// Middleware to parse incoming JSON payloads
+app.use(express.json());
+
+const server = http.createServer(app);
+
+// Configure Socket.io with CORS allowing your frontend origin
+const io = new Server(server, {
+  cors: {
+    origin: "https://realtimecodecolab.onrender.com", 
+    methods: ["GET", "POST"],
+  },
+});
+
+// --- Proxy Code Execution using Wandbox API ---
+app.post("/execute", async (req, res) => {
+  const { code, compiler } = req.body;
+  
+  try {
+    const response = await fetch("https://wandbox.org/api/compile.json", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        // Uses the dynamic compiler passed from the frontend, defaults to Node 20
+        compiler: compiler || "nodejs-20.17.0", 
+        code: code,
+      }),
+    });
+    
+    // Safely parse the response in case Wandbox returns a plain text error instead of JSON
+    const text = await response.text();
+    try {
+      const data = JSON.parse(text);
+      res.status(response.status).json(data);
+    } catch (err) {
+      console.error("Wandbox returned non-JSON:", text);
+      // Return a structured JSON error to the frontend if parsing fails
+      res.status(400).json({ status: "1", program_error: text });
+    }
+  } catch (error) {
+    console.error("Execution error:", error);
+    res.status(500).json({ status: "1", program_error: "Backend execution failed" });
+  }
+});
+
+const userSocketMap = {};
+const getAllConnectedClients = (roomId) => {
+  return Array.from(io.sockets.adapter.rooms.get(roomId) || []).map(
+    (socketId) => {
+      return {
+        socketId,
+        username: userSocketMap[socketId],
+      };
+    }
+  );
+};
+
+io.on("connection", (socket) => {
+  socket.on(ACTIONS.JOIN, ({ roomId, username }) => {
+    userSocketMap[socket.id] = username;
+    socket.join(roomId);
+    const clients = getAllConnectedClients(roomId);
+    clients.forEach(({ socketId }) => {
+      io.to(socketId).emit(ACTIONS.JOINED, {
+        clients,
+        username,
+        socketId: socket.id,
+      });
+    });
+  });
+
+  socket.on(ACTIONS.CODE_CHANGE, ({ roomId, code }) => {
+    socket.in(roomId).emit(ACTIONS.CODE_CHANGE, { code });
+  });
+  
+  socket.on(ACTIONS.SYNC_CODE, ({ socketId, code }) => {
+    io.to(socketId).emit(ACTIONS.CODE_CHANGE, { code });
+  });
+
+  socket.on("disconnecting", () => {
+    const rooms = [...socket.rooms];
+    rooms.forEach((roomId) => {
+      socket.in(roomId).emit(ACTIONS.DISCONNECTED, {
+        socketId: socket.id,
+        username: userSocketMap[socket.id],
+      });
+    });
+
+    delete userSocketMap[socket.id];
+    socket.leave();
+  });
+});
+
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+

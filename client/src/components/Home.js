@@ -3,111 +3,133 @@ import { v4 as uuid } from "uuid";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
+const faqs = [
+  {
+    q: "🚀 How do I create a new room?",
+    a: 'Click "New Room" to auto-generate a unique Room ID, then enter your username and click JOIN. Share the Room ID with collaborators.',
+  },
+  {
+    q: "👥 How do I invite collaborators?",
+    a: "Share your Room ID with teammates. They enter the same ID and their own username to join your live session instantly.",
+  },
+  {
+    q: "💻 Which languages are supported?",
+    a: "JavaScript (Node.js), Python, C, C++, Java, and Rust — all with auto-loaded Hello World boilerplate and language-aware error hints.",
+  },
+  {
+    q: "⚡ How does live collaboration work?",
+    a: "All keystrokes sync in real time via WebSocket. Members appear as avatar icons on the left sidebar with hover tooltips showing their names.",
+  },
+  {
+    q: "▶️ How do I run code?",
+    a: 'Select your language from the dropdown, write or edit code, then hit "Run Code". Output and error hints appear in the bottom console panel.',
+  },
+];
+
 function Home() {
   const [roomId, setRoomId] = useState("");
   const [username, setUsername] = useState("");
-
+  const [openFaq, setOpenFaq] = useState(null);
   const navigate = useNavigate();
 
   const generateRoomId = (e) => {
     e.preventDefault();
-    const Id = uuid();
-    setRoomId(Id);
-    toast.success("Room Id is generated");
+    setRoomId(uuid());
+    toast.success("Room ID generated!");
   };
 
   const joinRoom = () => {
     if (!roomId || !username) {
-      toast.error("Both the field is requried");
+      toast.error("Both fields are required");
       return;
     }
-
-    // redirect
-    navigate(`/editor/${roomId}`, {
-      state: {
-        username,
-      },
-    });
-    toast.success("room is created");
+    navigate(`/editor/${roomId}`, { state: { username } });
+    toast.success("Room joined!");
   };
 
-  // when enter then also join
   const handleInputEnter = (e) => {
-    if (e.code === "Enter") {
-      joinRoom();
-    }
+    if (e.code === "Enter") joinRoom();
   };
 
   return (
-    <div className="container-fluid bg-light">
-      <div className="row justify-content-center align-items-center min-vh-100">
-        <div className="col-12 col-md-6">
-          <div className="card shadow-sm p-2 mb-5 bg-black rounded">
-            <div className="card-body text-center bg-light">
-              {/* <img
-                src="/images/codecast.png"
-                alt="Logo"
-                className="img-fluid mx-auto d-block"
-                style={{ maxWidth: "150px", filter: "invert(75%)" }}
-              /> */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                style={{ width: "48px", height: "48px" }}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25"
-                />
-              </svg>
-              <p>Code Colab</p>
+    <div className="home-page">
+      <div className="home-grid-bg" />
+      <div className="home-orb home-orb--1" />
+      <div className="home-orb home-orb--2" />
 
-              <h4 className="card-title text-dark mb-4">Enter the ROOM ID</h4>
-
-              <div className="form-group">
-                <input
-                  type="text"
-                  value={roomId}
-                  onChange={(e) => setRoomId(e.target.value)}
-                  className="form-control mb-2"
-                  placeholder="ROOM ID"
-                  onKeyUp={handleInputEnter}
-                />
-              </div>
-              <div className="form-group">
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="form-control mb-2"
-                  placeholder="USERNAME"
-                  onKeyUp={handleInputEnter}
-                />
-              </div>
-              <button
-                onClick={joinRoom}
-                className="btn btn-success btn-lg btn-block"
-              >
-                JOIN
-              </button>
-              <p className="mt-3 text-dark">
-                Don't have a room ID? create{" "}
-                <span
-                  onClick={generateRoomId}
-                  className=" text-success p-2"
-                  style={{ cursor: "pointer" }}
-                >
-                  {" "}
-                  New Room
-                </span>
-              </p>
-            </div>
-          </div>
+      <div className="home-container">
+        {/* Hero */}
+        <div className="home-hero">
+          <div className="home-badge">REAL-TIME CODE COLLABORATION</div>
+          <h1 className="home-title">
+            Code<span className="home-title-accent">Colab</span>
+          </h1>
+          <p className="home-subtitle">
+            Write, run, and collaborate on code in real time — no setup required.
+          </p>
         </div>
+
+        {/* Join card */}
+        <div className="home-card">
+          <div className="home-card-glow" />
+          <h2 className="home-card-title">Join a Room</h2>
+
+          <div className="home-input-group">
+            <input
+              type="text"
+              value={roomId}
+              onChange={(e) => setRoomId(e.target.value)}
+              className="home-input"
+              placeholder="ROOM ID"
+              onKeyUp={handleInputEnter}
+            />
+          </div>
+
+          <div className="home-input-group">
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="home-input"
+              placeholder="USERNAME"
+              onKeyUp={handleInputEnter}
+            />
+          </div>
+
+          <button className="home-join-btn" onClick={joinRoom}>
+            JOIN ROOM
+          </button>
+
+          <p className="home-new-room-text">
+            No room ID?{" "}
+            <span className="home-new-room-link" onClick={generateRoomId}>
+              Generate New Room
+            </span>
+          </p>
+        </div>
+
+        {/* How to use */}
+        <div className="home-faq-section">
+          <h3 className="home-faq-title">How to Use</h3>
+          {faqs.map((item, i) => (
+            <div key={i} className="home-faq-item">
+              <button
+                className={`home-faq-btn${openFaq === i ? " home-faq-btn--open" : ""}`}
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+              >
+                <span>{item.q}</span>
+                <span className={`home-faq-arrow${openFaq === i ? " home-faq-arrow--open" : ""}`}>
+                  ▾
+                </span>
+              </button>
+              {openFaq === i && (
+                <div className="home-faq-answer">{item.a}</div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <p className="home-footer">© 2025 CodeColab · Built for real-time devs</p>
       </div>
     </div>
   );

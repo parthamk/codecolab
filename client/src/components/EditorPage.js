@@ -7,39 +7,95 @@ import { useNavigate, useLocation, Navigate, useParams } from "react-router-dom"
 import { toast } from "react-hot-toast";
 
 const boilerplates = {
-  "nodejs-20.17.0": 'console.log("Hello from JavaScript!");',
-  "cpython-3.12.0": 'print("Hello from Python!")',
-  "gcc-13.2.0-c": '#include <stdio.h>\n\nint main() {\n    printf("Hello from C!\\n");\n    return 0;\n}',
-  "gcc-13.2.0": '#include <iostream>\n\nint main() {\n    std::cout << "Hello from C++!" << std::endl;\n    return 0;\n}',
-  "openjdk-jdk-21+35": 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello from Java!");\n    }\n}',
-  "rust-1.82.0": 'fn main() {\n    println!("Hello from Rust!");\n}',
+  "nodejs-20.17.0":   '// JavaScript (Node.js)\nconsole.log("Hello, World!");',
+  "cpython-3.12.0":   '# Python\nprint("Hello, World!")',
+  "gcc-13.2.0-c":     '// C\n#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}',
+  "gcc-13.2.0":       '// C++\n#include <iostream>\n\nint main() {\n    std::cout << "Hello, World!" << std::endl;\n    return 0;\n}',
+  "openjdk-jdk-21+35":'// Java\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}',
+  "rust-1.82.0":      '// Rust\nfn main() {\n    println!("Hello, World!");\n}',
 };
 
+function getErrorHint(language, errorOutput, code) {
+  const e = errorOutput || "";
+
+  if (language.includes("nodejs")) {
+    if (e.includes("SyntaxError"))        return "💡 JavaScript: Check for missing brackets, parentheses, or a stray comma.";
+    if (e.includes("ReferenceError"))     return "💡 JavaScript: A variable is used before it's declared. Check spelling or add `let`/`const`.";
+    if (e.includes("TypeError"))          return "💡 JavaScript: You may be calling a non-function or accessing a property of `null`/`undefined`.";
+    if (e.includes("Cannot find module")) return "💡 JavaScript: A required module is missing. Make sure all imports are correct.";
+    return "💡 JavaScript: Check for missing semicolons, mismatched brackets, or undefined variables.";
+  }
+
+  if (language.includes("python")) {
+    if (e.includes("IndentationError"))   return "💡 Python: Fix indentation — Python relies on consistent spaces (not tabs mixed with spaces).";
+    if (e.includes("SyntaxError"))        return "💡 Python: Check colons after `def`/`if`/`for`, unclosed quotes, or mismatched parentheses.";
+    if (e.includes("NameError"))          return "💡 Python: A variable name isn't defined. Check for typos or missing imports.";
+    if (e.includes("TypeError"))          return "💡 Python: Type mismatch. Ensure you're not mixing incompatible types (e.g. str + int).";
+    if (e.includes("ImportError") || e.includes("ModuleNotFoundError"))
+                                          return "💡 Python: Module not found. Confirm the module name and that it's available in this environment.";
+    return "💡 Python: Review your code for indentation, syntax, or logic issues.";
+  }
+
+  if (language === "gcc-13.2.0-c") {
+    if (e.includes("undeclared"))          return "💡 C: Variable used without declaration. Declare it before use (e.g. `int x;`).";
+    if (e.includes("missing ';'") || e.includes("expected ';'"))
+                                           return "💡 C: Missing semicolon at end of a statement.";
+    if (e.includes("main"))                return "💡 C: Make sure you have `int main()` defined as the entry point.";
+    if (e.includes("implicit declaration")) return "💡 C: Include the correct header file (e.g. `#include <stdio.h>`).";
+    return "💡 C: Check for missing semicolons, undeclared variables, or missing `#include` headers.";
+  }
+
+  if (language === "gcc-13.2.0") {
+    if (e.includes("was not declared"))    return "💡 C++: Variable or function not declared in this scope.";
+    if (e.includes("no match for 'operator'")) return "💡 C++: Operator type mismatch. Ensure operand types are compatible.";
+    if (e.includes("main"))                return "💡 C++: Ensure `int main()` exists as the entry point.";
+    if (e.includes("linker"))              return "💡 C++: Linker error — a function is declared but not defined, or you're missing a library.";
+    return "💡 C++: Check for undeclared variables, type mismatches, or missing `#include` statements.";
+  }
+
+  if (language.includes("openjdk")) {
+    if (!code.includes("public class Main")) return "💡 Java: Your class must be named `Main` in this environment (`public class Main { ... }`).";
+    if (e.includes("';' expected"))          return "💡 Java: Missing semicolon at the end of a statement.";
+    if (e.includes("cannot find symbol"))    return "💡 Java: An identifier (variable/method) is not found. Check spelling and imports.";
+    if (e.includes("reached end of file"))   return "💡 Java: Unexpected end of file — you may have unclosed `{` braces.";
+    return "💡 Java: Check for missing semicolons, unmatched braces, or that your class is named `Main`.";
+  }
+
+  if (language.includes("rust")) {
+    if (e.includes("expected"))          return "💡 Rust: Syntax error. Check semicolons, braces, and `fn` signatures.";
+    if (e.includes("cannot find value")) return "💡 Rust: Variable not found. Make sure it's declared with `let`.";
+    if (e.includes("borrow"))            return "💡 Rust: Borrow checker issue. Review ownership and borrowing rules.";
+    if (e.includes("mismatched types"))  return "💡 Rust: Type mismatch. Ensure function return types and variable types align.";
+    return "💡 Rust: Review ownership, semicolons, and function signatures.";
+  }
+
+  if (e.includes("Backend execution failed") || e.includes("Failed to connect")) {
+    return "⚠️ Server Issue: The execution server may be overloaded or unavailable. Wait a moment and try again.";
+  }
+
+  return "💡 Check your syntax, logic, and that your code compiles for the selected language.";
+}
+
 function EditorPage() {
-  const [clients, setClients] = useState([]);
-  const [output, setOutput] = useState("");
-  const [isCompiling, setIsCompiling] = useState(false);
-  const [language, setLanguage] = useState("nodejs-20.17.0");
-  const [showServerWarning, setShowServerWarning] = useState(true);
-  
-  const codeRef = useRef(boilerplates["nodejs-20.17.0"]); // Initial default boilerplate
+  const [clients, setClients]           = useState([]);
+  const [output, setOutput]             = useState("");
+  const [isCompiling, setIsCompiling]   = useState(false);
+  const [language, setLanguage]         = useState("nodejs-20.17.0");
+  const [showWarning, setShowWarning]   = useState(true);
+
+  const codeRef   = useRef(boilerplates["nodejs-20.17.0"]);
   const socketRef = useRef(null);
-  const { roomId } = useParams();
-  const Location = useLocation();
-  const navigate = useNavigate();
+  const { roomId }  = useParams();
+  const Location    = useLocation();
+  const navigate    = useNavigate();
 
   useEffect(() => {
     const init = async () => {
       socketRef.current = await initSocket();
-      socketRef.current.emit(ACTIONS.JOIN, {
-        roomId,
-        username: Location.state?.username,
-      });
+      socketRef.current.emit(ACTIONS.JOIN, { roomId, username: Location.state?.username });
 
       socketRef.current.on(ACTIONS.JOINED, ({ clients, username, socketId }) => {
-        if (username !== Location.state?.username) {
-          toast.success(`${username} joined.`);
-        }
+        if (username !== Location.state?.username) toast.success(`${username} joined.`);
         setClients(clients);
         socketRef.current.emit(ACTIONS.SYNC_CODE, { code: codeRef.current, socketId });
       });
@@ -53,105 +109,93 @@ function EditorPage() {
     return () => socketRef.current?.disconnect();
   }, [roomId, Location.state?.username]);
 
-  // Handle language change and update boilerplate
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
-    const currentCode = codeRef.current;
+    const isDefault =
+      Object.values(boilerplates).some((b) => b.trim() === codeRef.current.trim()) ||
+      codeRef.current.trim() === "";
 
-    // Only overwrite with boilerplate if the editor is empty or contains another boilerplate
-    const isDefaultCode = Object.values(boilerplates).some(b => b.trim() === currentCode.trim()) || currentCode.trim() === "";
-    
-    if (isDefaultCode) {
-      const newBoilerplate = boilerplates[newLang];
-      codeRef.current = newBoilerplate;
-      // Emit the change so other users see the new boilerplate
-      socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, code: newBoilerplate });
-      // Note: Editor component will pick this up via the socket listener
+    if (isDefault) {
+      const bp = boilerplates[newLang];
+      codeRef.current = bp;
+      socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, code: bp });
     }
-    
     setLanguage(newLang);
+    setOutput("");
   };
 
   const runCode = async () => {
     setIsCompiling(true);
-    setOutput("Executing code...\n");
-
+    setOutput("⏳ Executing code...\n");
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/execute`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: codeRef.current, compiler: language }),
       });
-      
       const result = await response.json();
-      
       if (result.status !== "0") {
-        const errorOutput = result.program_error || result.compiler_error || result.message || "Unknown Error";
-        
-        // --- Improved Language-Specific Suggestions ---
-        let suggestion = "Check for missing semicolons, brackets, or undefined variables.";
-        if (language.includes("python") && errorOutput.includes("IndentationError")) {
-          suggestion = "Fix the indentation of your blocks. Python relies on consistent spacing.";
-        } else if (language.includes("gcc") && errorOutput.includes("main")) {
-          suggestion = "Ensure you have a valid 'int main()' function defined.";
-        } else if (language.includes("openjdk") && !codeRef.current.includes("public class Main")) {
-          suggestion = "In this environment, your class must be named 'Main'.";
-        }
-
-        setOutput(`Error:\n${errorOutput}\n\n💡 Fix Suggestion:\n${suggestion}`);
+        const err = result.program_error || result.compiler_error || result.message || "Unknown Error";
+        setOutput(`❌ Error:\n${err}\n\n${getErrorHint(language, err, codeRef.current)}`);
       } else {
-        setOutput(result.program_message || "Execution finished with no output.");
+        setOutput(result.program_message || "✅ Execution finished with no output.");
       }
-    } catch (err) {
-      setOutput("Failed to connect to execution server.");
+    } catch {
+      setOutput(`❌ Failed to connect to execution server.\n\n${getErrorHint(language, "Failed to connect", codeRef.current)}`);
     } finally {
       setIsCompiling(false);
     }
   };
 
+  const downloadCode = () => {
+    const ext = { "nodejs-20.17.0": "js", "cpython-3.12.0": "py", "gcc-13.2.0-c": "c", "gcc-13.2.0": "cpp", "openjdk-jdk-21+35": "java", "rust-1.82.0": "rs" }[language] || "txt";
+    const blob = new Blob([codeRef.current], { type: "text/plain" });
+    const link = document.body.appendChild(document.createElement("a"));
+    link.href = URL.createObjectURL(blob);
+    link.download = `code-${roomId}.${ext}`;
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (!Location.state) return <Navigate to="/" />;
 
   return (
-    <div className="container-fluid vh-100 position-relative">
-      {showServerWarning && (
-        <div className="fixed-bottom mb-4 mx-auto text-center" style={{ zIndex: 9999 }}>
-            <div className="bg-dark text-white p-3 rounded-pill d-inline-block shadow border border-secondary" style={{ maxWidth: "90%" }}>
-                <span className="me-3">⚠️ Website may face server issues. Refresh and try again if it disconnects.</span>
-                <button className="btn btn-sm btn-light rounded-pill px-4 fw-bold" onClick={() => setShowServerWarning(false)}>OK</button>
-            </div>
+    <div className="editor-page">
+      {showWarning && (
+        <div className="editor-warning-banner">
+          <span>⚠️ Server may face occasional delays. Refresh if disconnected.</span>
+          <button className="editor-warning-btn" onClick={() => setShowWarning(false)}>OK</button>
         </div>
       )}
 
-      <div className="row h-100">
-        <div className="col-md-2 bg-light d-flex flex-column h-100 p-3 shadow-sm">
-          <div className="flex-grow-1 overflow-auto">
-            <h5 className="mb-3 border-bottom pb-2">Members</h5>
+      <div className="editor-layout">
+        {/* Sidebar */}
+        <div className="editor-sidebar">
+          <span className="editor-sidebar-logo">⌨</span>
+          <div className="editor-members-label">MEMBERS</div>
+          <div className="editor-client-list">
             {clients.map((c) => <Client key={c.socketId} username={c.username} />)}
           </div>
-          <div className="mt-auto d-flex flex-column gap-2">
-            <button className="btn btn-success" onClick={() => {
-                navigator.clipboard.writeText(roomId);
-                toast.success("Room ID copied");
-            }}>Copy Room ID</button>
-            <button className="btn btn-primary" onClick={() => {
-                 const blob = new Blob([codeRef.current], { type: "text/plain" });
-                 const link = document.body.appendChild(document.createElement("a"));
-                 link.href = URL.createObjectURL(blob);
-                 link.download = `code-${roomId}.txt`;
-                 link.click();
-                 document.body.removeChild(link);
-            }}>Download Code</button>
-            <button className="btn btn-danger" onClick={() => navigate("/")}>Leave Room</button>
+          <div className="editor-sidebar-actions">
+            <button
+              className="editor-side-btn editor-side-btn--copy"
+              onClick={() => { navigator.clipboard.writeText(roomId); toast.success("Room ID copied"); }}
+            >
+              📋 Copy ID
+            </button>
+            <button className="editor-side-btn editor-side-btn--download" onClick={downloadCode}>
+              ⬇ Download
+            </button>
+            <button className="editor-side-btn editor-side-btn--leave" onClick={() => navigate("/")}>
+              ✕ Leave
+            </button>
           </div>
         </div>
 
-        <div className="col-md-10 d-flex flex-column h-100 p-0">
-          <div className="d-flex justify-content-end align-items-center p-2 bg-secondary border-bottom">
-            <select 
-              className="form-select w-auto me-3 fw-bold bg-dark text-white border-secondary" 
-              value={language} 
-              onChange={handleLanguageChange}
-            >
+        {/* Editor area */}
+        <div className="editor-area">
+          <div className="editor-toolbar">
+            <select className="editor-lang-select" value={language} onChange={handleLanguageChange}>
               <option value="nodejs-20.17.0">JavaScript (Node.js)</option>
               <option value="cpython-3.12.0">Python</option>
               <option value="gcc-13.2.0-c">C</option>
@@ -159,12 +203,12 @@ function EditorPage() {
               <option value="openjdk-jdk-21+35">Java</option>
               <option value="rust-1.82.0">Rust</option>
             </select>
-            <button className="btn btn-warning px-4 fw-bold" onClick={runCode} disabled={isCompiling}>
-              {isCompiling ? "Running..." : "Run Code"}
+            <button className="editor-run-btn" onClick={runCode} disabled={isCompiling}>
+              {isCompiling ? "⏳ Running..." : "▶ Run Code"}
             </button>
           </div>
 
-          <div className="flex-grow-1 overflow-auto" style={{ height: "70%" }}>
+          <div className="editor-cm-wrapper">
             <Editor
               socketRef={socketRef}
               roomId={roomId}
@@ -174,10 +218,15 @@ function EditorPage() {
             />
           </div>
 
-          <div className="bg-dark text-white p-3" style={{ height: "30%", borderTop: "2px solid #555", overflowY: "auto" }}>
-            <h6 className="text-secondary mb-2">Output Console</h6>
-            <pre style={{ whiteSpace: "pre-wrap", fontSize: "14px" }}>
-              {output || "Run code to see output..."}
+          <div className="editor-console">
+            <div className="editor-console-header">
+              <span className="editor-console-label">OUTPUT CONSOLE</span>
+              {output && (
+                <button className="editor-console-clear" onClick={() => setOutput("")}>Clear</button>
+              )}
+            </div>
+            <pre className="editor-console-pre">
+              {output || "Run code to see output here..."}
             </pre>
           </div>
         </div>
