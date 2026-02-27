@@ -13,14 +13,11 @@ import "codemirror/addon/hint/javascript-hint";
 import "codemirror/addon/lint/lint.css";
 import "codemirror/addon/lint/lint";
 import "codemirror/addon/lint/javascript-lint";
-import { JSHINT } from "jshint";
 
 import "codemirror/lib/codemirror.css";
 import CodeMirror from "codemirror";
 import { ACTIONS } from "../Actions";
 
-// Bind JSHINT to window so CodeMirror can access it
-window.JSHINT = JSHINT;
 
 const Editor = ({ socketRef, roomId, onCodeChange, username }) => {
   const editorRef = useRef(null);
