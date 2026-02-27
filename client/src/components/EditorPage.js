@@ -108,11 +108,18 @@ function EditorPage() {
     const codeContent = codeRef.current;
     if (!codeContent) return toast.error("No code to run");
     
+    // --- Language Warning Popup ---
+    const userAgreed = window.confirm(
+      "⚠️ CodeColab Runtime\n\nCurrently, CodeColab only supports executing JavaScript (Node.js) code.\n\nDo you want to proceed?"
+    );
+    
+    if (!userAgreed) return; // Stop execution if they click cancel
+
     setIsCompiling(true);
     setOutput("Executing code...\n");
 
     try {
-      // Send code to YOUR backend, not directly to Piston
+      // Send code to YOUR backend to bypass browser CORS
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/execute`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -121,19 +128,18 @@ function EditorPage() {
       
       const result = await response.json();
       
-      // Safety check: Prevent app crash if API is down or returns an error
-      if (!response.ok || !result.run) {
-        setOutput(`Execution Error: ${result.message || "Unable to run code at this time."}`);
+      if (!response.ok) {
+        setOutput(`Execution Error: Unable to reach the execution server.`);
         return;
       }
 
-      // Check if the code itself produced an error during execution
-      if (result.run.code !== 0) {
-        const errorOutput = result.run.output;
-        const placeholderSuggestion = "Make sure all variables are defined and syntax is correct based on the JSHint warnings in the editor.";
+      // Handle Wandbox API Response
+      if (result.status !== "0") {
+        const errorOutput = result.program_error || result.compiler_error || "Unknown Error";
+        const placeholderSuggestion = "Check your syntax for missing brackets or undefined variables. Ensure your code is valid JavaScript.";
         setOutput(`Error:\n${errorOutput}\n\n💡 Fix Suggestion:\n${placeholderSuggestion}`);
       } else {
-        setOutput(result.run.output || "Execution finished with no output.");
+        setOutput(result.program_message || "Execution finished with no output.");
       }
     } catch (err) {
       console.error(err);

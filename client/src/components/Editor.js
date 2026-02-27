@@ -18,7 +18,6 @@ import "codemirror/lib/codemirror.css";
 import CodeMirror from "codemirror";
 import { ACTIONS } from "../Actions";
 
-
 const Editor = ({ socketRef, roomId, onCodeChange, username }) => {
   const editorRef = useRef(null);
 
@@ -27,15 +26,14 @@ const Editor = ({ socketRef, roomId, onCodeChange, username }) => {
       const handleTextHighlight = ({ from, to }) => {
         editorRef.current.markText(from, to, { className: "highlighted-text" });
       };
-
       socketRef.current.on(ACTIONS.TEXT_HIGHLIGHT, handleTextHighlight);
-
       return () => {
         socketRef.current.off(ACTIONS.TEXT_HIGHLIGHT, handleTextHighlight);
       };
     }
   }, [socketRef, roomId]);
 
+  // Empty dependency array prevents the editor from re-initializing and wiping code
   useEffect(() => {
     const initEditor = () => {
       const editor = CodeMirror.fromTextArea(
@@ -48,7 +46,7 @@ const Editor = ({ socketRef, roomId, onCodeChange, username }) => {
           lineNumbers: true,
           extraKeys: { "Ctrl-Space": "autocomplete" },
           gutters: ["CodeMirror-lint-markers"],
-          lint: true,
+          lint: true, // Relies on window.JSHINT loaded via CDN in index.html
         }
       );
       editorRef.current = editor;
@@ -68,12 +66,12 @@ const Editor = ({ socketRef, roomId, onCodeChange, username }) => {
     };
 
     initEditor();
-  }, [onCodeChange, roomId, socketRef]);
+  }, []); 
 
   useEffect(() => {
     if (socketRef.current) {
       socketRef.current.on(ACTIONS.CODE_CHANGE, ({ code }) => {
-        if (code !== null) {
+        if (code !== null && editorRef.current.getValue() !== code) {
           editorRef.current.setValue(code);
         }
       });

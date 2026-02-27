@@ -5,9 +5,9 @@ const { Server } = require("socket.io");
 const ACTIONS = require("./Actions");
 const cors = require("cors");
 
-// Enabled CORS for standard Express HTTP requests
+// Enable CORS for standard Express HTTP requests
 app.use(cors({
-  origin: "https://realtimecodecolab.onrender.com",
+  origin: "https://realtimecodecolab.onrender.com", // Your frontend domain
   methods: ["GET", "POST"]
 }));
 
@@ -24,20 +24,18 @@ const io = new Server(server, {
   },
 });
 
-// --- NEW ROUTE: Proxy Code Execution ---
+// --- Proxy Code Execution using Wandbox API ---
 app.post("/execute", async (req, res) => {
   const { code } = req.body;
   
   try {
-    // Makeing the request to Piston from the backend to bypass browser restrictions
-    // Using version "*" tells Piston to automatically use the latest available Node.js version
-    const response = await fetch("https://emkc.org/api/v2/piston/execute", {
+    // Wandbox is a fully free code execution API that requires no auth
+    const response = await fetch("https://wandbox.org/api/compile.json", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        language: "javascript",
-        version: "*", 
-        files: [{ content: code }],
+        compiler: "nodejs-head", // Runs the latest Node.js version
+        code: code,
       }),
     });
     
