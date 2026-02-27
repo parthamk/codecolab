@@ -26,14 +26,15 @@ const io = new Server(server, {
 
 // --- Proxy Code Execution using Wandbox API ---
 app.post("/execute", async (req, res) => {
-  const { code } = req.body;
+  const { code, compiler } = req.body;
   
   try {
     const response = await fetch("https://wandbox.org/api/compile.json", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        compiler: "nodejs-16.14.0", // Use a stable, specific version to prevent "Unknown Compiler" errors
+        // Uses the dynamic compiler passed from the frontend, defaults to Node 20
+        compiler: compiler || "nodejs-20.17.0", 
         code: code,
       }),
     });

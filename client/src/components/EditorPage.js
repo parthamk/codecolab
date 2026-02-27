@@ -15,6 +15,9 @@ function EditorPage() {
   const [clients, setClients] = useState([]);
   const [output, setOutput] = useState("");
   const [isCompiling, setIsCompiling] = useState(false);
+  const [language, setLanguage] = useState("nodejs-20.17.0");
+  const [showServerWarning, setShowServerWarning] = useState(true);
+  
   const codeRef = useRef(null);
 
   const Location = useLocation();
@@ -92,11 +95,12 @@ function EditorPage() {
     const codeContent = codeRef.current;
     if (!codeContent) return toast.error("No code to download");
     
-    const blob = new Blob([codeContent], { type: "text/javascript" });
+    // Fallback simple extension since it supports multiple languages now
+    const blob = new Blob([codeContent], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `script-${roomId}.js`;
+    link.download = `script-${roomId}.txt`; 
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -107,13 +111,6 @@ function EditorPage() {
   const runCode = async () => {
     const codeContent = codeRef.current;
     if (!codeContent) return toast.error("No code to run");
-    
-    // --- Language Warning Popup ---
-    const userAgreed = window.confirm(
-      "⚠️ CodeColab Runtime\n\nCurrently, CodeColab only supports executing JavaScript (Node.js) code.\n\nDo you want to proceed?"
-    );
-    
-    if (!userAgreed) return;
 
     setIsCompiling(true);
     setOutput("Executing code...\n");
@@ -122,18 +119,19 @@ function EditorPage() {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/execute`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: codeContent }),
+        body: JSON.stringify({ 
+            code: codeContent,
+            compiler: language // Sending the selected language to backend
+        }),
       });
       
       const result = await response.json();
       
-      // If Wandbox responds with an error, the status flag is not "0"
       if (result.status !== "0") {
         const errorOutput = result.program_error || result.compiler_error || result.message || "Unknown Error";
-        const placeholderSuggestion = "Check your syntax for missing brackets or undefined variables. Ensure your code is valid JavaScript.";
+        const placeholderSuggestion = "Check your syntax for missing brackets or undefined variables. Ensure your code is valid for the selected language.";
         setOutput(`Error:\n${errorOutput}\n\n💡 Fix Suggestion:\n${placeholderSuggestion}`);
       } else {
-        // Output successful execution
         setOutput(result.program_message || "Execution finished with no output.");
       }
     } catch (err) {
@@ -145,7 +143,41 @@ function EditorPage() {
   };
 
   return (
-    <div className="container-fluid vh-100">
+    <div className="container-fluid vh-100 position-relative">
+      
+      {/* Cookie-Style Server Issue Warning Popup */}
+      {showServerWarning && (
+        <div style={{
+          position: "fixed",
+          bottom: "20px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          backgroundColor: "#2c2e3a",
+          color: "#fff",
+          padding: "15px 30px",
+          borderRadius: "50px", 
+          boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.5)",
+          display: "flex",
+          alignItems: "center",
+          gap: "20px",
+          zIndex: 9999,
+          border: "1px solid #444",
+          width: "max-content",
+          maxWidth: "90%"
+        }}>
+          <span style={{ fontSize: "14px", fontWeight: "500" }}>
+            ⚠️ Website may face server issue. Please refresh the page and try again if that happens.
+          </span>
+          <button 
+            className="btn btn-sm btn-light rounded-pill px-4" 
+            onClick={() => setShowServerWarning(false)}
+            style={{ fontWeight: "bold" }}
+          >
+            OK
+          </button>
+        </div>
+      )}
+
       <div className="row h-100">
         {/* Sidebar panel */}
         <div
@@ -177,8 +209,23 @@ function EditorPage() {
         {/* Editor & Console panel */}
         <div className="col-md-10 d-flex flex-column h-100 p-0">
           
-          {/* Top Bar for Running Code */}
-          <div className="d-flex justify-content-end p-2 bg-secondary border-bottom">
+          {/* Top Bar for Running Code & Language Selection */}
+          <div className="d-flex justify-content-end align-items-center p-2 bg-secondary border-bottom">
+            {/* Language Dropdown */}
+            <select 
+              className="form-select w-auto me-3 fw-bold bg-dark text-white border-secondary" 
+              value={language} 
+              onChange={(e) => setLanguage(e.target.value)}
+              style={{ cursor: "pointer" }}
+            >
+              <option value="nodejs-20.17.0">JavaScript (Node.js)</option>
+              <option value="cpython-3.12.0">Python</option>
+              <option value="gcc-13.2.0-c">C</option>
+              <option value="gcc-13.2.0">C++ (GCC)</option>
+              <option value="openjdk-jdk-21+35">Java</option>
+              <option value="rust-1.82.0">Rust</option>
+            </select>
+            
             <button 
                 className="btn btn-warning px-4 fw-bold" 
                 onClick={runCode} 
