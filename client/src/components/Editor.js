@@ -1,72 +1,81 @@
 import React, { useEffect, useRef } from "react";
-import "codemirror/mode/javascript/javascript";
+import CodeMirror from "codemirror";
+import "codemirror/lib/codemirror.css";
 import "codemirror/theme/dracula.css";
+
+// Modes
+import "codemirror/mode/javascript/javascript";
+import "codemirror/mode/python/python";
+import "codemirror/mode/clike/clike"; // Handles C, C++, and Java
+import "codemirror/mode/rust/rust";
+
+// Addons
 import "codemirror/addon/edit/closetag";
 import "codemirror/addon/edit/closebrackets";
-
-// Autocomplete Addons
 import "codemirror/addon/hint/show-hint.css";
 import "codemirror/addon/hint/show-hint";
 import "codemirror/addon/hint/javascript-hint";
-
-// Linting Addons
+import "codemirror/addon/hint/anyword-hint";
 import "codemirror/addon/lint/lint.css";
 import "codemirror/addon/lint/lint";
 import "codemirror/addon/lint/javascript-lint";
 
-import "codemirror/lib/codemirror.css";
-import CodeMirror from "codemirror";
 import { ACTIONS } from "../Actions";
 
-const Editor = ({ socketRef, roomId, onCodeChange, username }) => {
+const Editor = ({ socketRef, roomId, onCodeChange, username, language }) => {
   const editorRef = useRef(null);
 
-  useEffect(() => {
-    if (socketRef.current) {
-      const handleTextHighlight = ({ from, to }) => {
-        editorRef.current.markText(from, to, { className: "highlighted-text" });
-      };
-      socketRef.current.on(ACTIONS.TEXT_HIGHLIGHT, handleTextHighlight);
-      return () => {
-        socketRef.current.off(ACTIONS.TEXT_HIGHLIGHT, handleTextHighlight);
-      };
-    }
-  }, [socketRef, roomId]);
+  // Helper to map Wandbox compilers to CodeMirror modes
+  const getMode = (lang) => {
+    if (lang.includes("nodejs")) return "javascript";
+    if (lang.includes("python")) return "python";
+    if (lang.includes("gcc")) return "text/x-c++src";
+    if (lang.includes("openjdk")) return "text/x-java";
+    if (lang.includes("rust")) return "rust";
+    return "javascript";
+  };
 
-  // Empty dependency array prevents the editor from re-initializing and wiping code
   useEffect(() => {
     const initEditor = () => {
-      const editor = CodeMirror.fromTextArea(
+      editorRef.current = CodeMirror.fromTextArea(
         document.getElementById("realtimeEditor"),
         {
-          mode: { name: "javascript", json: true },
+          mode: getMode(language),
           theme: "dracula",
           autoCloseTags: true,
           autoCloseBrackets: true,
           lineNumbers: true,
           extraKeys: { "Ctrl-Space": "autocomplete" },
           gutters: ["CodeMirror-lint-markers"],
-          lint: true, // Relies on window.JSHINT loaded via CDN in index.html
+          // Only enable linting for JavaScript since we have JSHint loaded
+          lint: language.includes("nodejs"), 
         }
       );
-      editorRef.current = editor;
 
-      editor.setSize(null, "100%");
+      editorRef.current.setSize(null, "100%");
       editorRef.current.on("change", (instance, changes) => {
         const { origin } = changes;
         const code = instance.getValue();
         onCodeChange(code);
         if (origin !== "setValue") {
-          socketRef.current.emit(ACTIONS.CODE_CHANGE, {
-            roomId,
-            code,
-          });
+          socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, code });
         }
       });
     };
 
-    initEditor();
-  }, []); 
+    if (!editorRef.current) initEditor();
+  }, []);
+
+  // Update mode and linting dynamically when the dropdown changes
+  useEffect(() => {
+    if (editorRef.current) {
+      const newMode = getMode(language);
+      editorRef.current.setOption("mode", newMode);
+      
+      // Toggle JSHint based on whether the language is JavaScript
+      editorRef.current.setOption("lint", language.includes("nodejs"));
+    }
+  }, [language]);
 
   useEffect(() => {
     if (socketRef.current) {
@@ -76,50 +85,8 @@ const Editor = ({ socketRef, roomId, onCodeChange, username }) => {
         }
       });
     }
-    return () => {
-      socketRef.current.off(ACTIONS.CODE_CHANGE);
-    };
+    return () => socketRef.current?.off(ACTIONS.CODE_CHANGE);
   }, [socketRef]);
-
-  useEffect(() => {
-    const editor = editorRef.current;
-    if (editor) {
-      const updateCursorActivity = () => {
-        const cursorPos = editor.getCursor();
-        const coords = editor.charCoords(cursorPos, "window");
-        socketRef.current.emit(ACTIONS.CURSOR_ACTIVITY, {
-          username,
-          roomId,
-          cursorPosition: coords,
-        });
-
-        let overlay = document.getElementById("cursor-overlay");
-        if (!overlay) {
-          overlay = document.createElement("div");
-          overlay.id = "cursor-overlay";
-          document.body.appendChild(overlay);
-        }
-        overlay.style.position = "absolute";
-        overlay.style.left = `${coords.left}px`;
-        overlay.style.top = `${
-          coords.top + parseInt(overlay.style.fontSize, 10) + 5
-        }px`;
-        overlay.style.fontSize = "10px";
-        overlay.style.color = "yellow";
-        overlay.innerText = `${username} is typing`;
-      };
-
-      editor.on("cursorActivity", updateCursorActivity);
-
-      return () => {
-        editor.off("cursorActivity", updateCursorActivity);
-        const overlay = document.getElementById("cursor-overlay");
-        if (overlay) {
-          overlay.remove();
-        }
-      };
-    }
-  }, [username, socketRef, roomId]);
 
   return (
     <div style={{ height: "100%" }}>
