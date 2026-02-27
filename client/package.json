@@ -8,6 +8,7 @@
     "@testing-library/user-event": "latest",
     "bootstrap": "latest",
     "codemirror": "latest",
+    "jshint": "^2.13.6",
     "react": "latest",
     "react-avatar": "latest",
     "react-dom": "latest",

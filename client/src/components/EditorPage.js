@@ -13,6 +13,8 @@ import { toast } from "react-hot-toast";
 
 function EditorPage() {
   const [clients, setClients] = useState([]);
+  const [output, setOutput] = useState("");
+  const [isCompiling, setIsCompiling] = useState(false);
   const codeRef = useRef(null);
 
   const Location = useLocation();
@@ -20,6 +22,7 @@ function EditorPage() {
   const { roomId } = useParams();
 
   const socketRef = useRef(null);
+
   useEffect(() => {
     const init = async () => {
       socketRef.current = await initSocket();
@@ -37,16 +40,13 @@ function EditorPage() {
         username: Location.state?.username,
       });
 
-      // Listen for new clients joining the chatroom
       socketRef.current.on(
         ACTIONS.JOINED,
         ({ clients, username, socketId }) => {
-          // this insure that new user connected message do not display to that user itself
           if (username !== Location.state?.username) {
             toast.success(`${username} joined the room.`);
           }
           setClients(clients);
-          // also send the code to sync
           socketRef.current.emit(ACTIONS.SYNC_CODE, {
             code: codeRef.current,
             socketId,
@@ -54,7 +54,6 @@ function EditorPage() {
         }
       );
 
-      // listening for disconnected
       socketRef.current.on(ACTIONS.DISCONNECTED, ({ socketId, username }) => {
         toast.success(`${username} left the room`);
         setClients((prev) => {
@@ -64,7 +63,6 @@ function EditorPage() {
     };
     init();
 
-    // cleanup
     return () => {
       socketRef.current && socketRef.current.disconnect();
       socketRef.current.off(ACTIONS.JOINED);
@@ -79,10 +77,10 @@ function EditorPage() {
   const copyRoomId = async () => {
     try {
       await navigator.clipboard.writeText(roomId);
-      toast.success(`roomIs is copied`);
+      toast.success("Room ID is copied");
     } catch (error) {
       console.log(error);
-      toast.error("unable to copy the room Id");
+      toast.error("Unable to copy the room ID");
     }
   };
 
@@ -90,47 +88,127 @@ function EditorPage() {
     navigate("/");
   };
 
+  const downloadCode = () => {
+    const codeContent = codeRef.current;
+    if (!codeContent) return toast.error("No code to download");
+    
+    const blob = new Blob([codeContent], { type: "text/javascript" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `script-${roomId}.js`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success("Code downloaded successfully!");
+  };
+
+  const runCode = async () => {
+    const codeContent = codeRef.current;
+    if (!codeContent) return toast.error("No code to run");
+    
+    setIsCompiling(true);
+    setOutput("Executing code...\n");
+
+    try {
+      // Sending code to execution sandbox
+      const response = await fetch("https://emkc.org/api/v2/piston/execute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          language: "javascript",
+          version: "18.15.0",
+          files: [{ content: codeContent }],
+        }),
+      });
+      const result = await response.json();
+      
+      if (result.run.code !== 0) {
+        const errorOutput = result.run.output;
+        setOutput(`Error:\n${errorOutput}\n\nAnalyzing error...`);
+        
+        // --- AI Suggestion Call ---
+        // Pass 'errorOutput' to an AI API endpoint (e.g., your own backend hitting the Gemini API)
+        // const suggestion = await fetchAISuggestion(errorOutput); 
+        
+        const placeholderSuggestion = "Make sure all variables are defined and syntax is correct based on the JSHint warnings in the editor.";
+        setOutput(`Error:\n${errorOutput}\n\n💡 Fix Suggestion:\n${placeholderSuggestion}`);
+      } else {
+        setOutput(result.run.output || "Execution finished with no output.");
+      }
+    } catch (err) {
+      console.error(err);
+      setOutput("Failed to connect to execution server.");
+    } finally {
+      setIsCompiling(false);
+    }
+  };
+
   return (
     <div className="container-fluid vh-100">
       <div className="row h-100">
-        {/* client panel */}
+        {/* Sidebar panel */}
         <div
-          className="col-md-2 bg-light text-dark d-flex flex-column h-100"
+          className="col-md-2 bg-light text-dark d-flex flex-column h-100 p-3"
           style={{ boxShadow: "2px 0px 4px rgba(0, 0, 0, 0.1)" }}
         >
-          {/* We can put logo here too */}
           <div className="d-flex flex-column flex-grow-1 overflow-auto">
-            <span className="mb-2">Members</span>
+            <h5 className="mb-3 border-bottom pb-2">Members</h5>
             {clients.map((client) => (
               <Client key={client.socketId} username={client.username} />
             ))}
           </div>
 
           <hr />
-          {/* Buttons */}
-          <div className="mt-auto ">
+          {/* Action Buttons */}
+          <div className="mt-auto d-flex flex-column gap-2">
             <button className="btn btn-success" onClick={copyRoomId}>
               Copy Room ID
             </button>
-            <button
-              className="btn btn-danger mt-2 mb-2 px-3 btn-block"
-              onClick={leaveRoom}
-            >
+            <button className="btn btn-primary" onClick={downloadCode}>
+              Download Code
+            </button>
+            <button className="btn btn-danger" onClick={leaveRoom}>
               Leave Room
             </button>
           </div>
         </div>
 
-        {/* Editor panel */}
-        <div className="col-md-10 text-light d-flex flex-column h-100 ">
-          <Editor
-            socketRef={socketRef}
-            roomId={roomId}
-            username={Location.state?.username} // Pass username as a prop
-            onCodeChange={(code) => {
-              codeRef.current = code;
-            }}
-          />
+        {/* Editor & Console panel */}
+        <div className="col-md-10 d-flex flex-column h-100 p-0">
+          
+          {/* Top Bar for Running Code */}
+          <div className="d-flex justify-content-end p-2 bg-secondary border-bottom">
+            <button 
+                className="btn btn-warning px-4 fw-bold" 
+                onClick={runCode} 
+                disabled={isCompiling}
+            >
+              {isCompiling ? "Running..." : "Run Code"}
+            </button>
+          </div>
+
+          {/* Main Code Editor */}
+          <div className="flex-grow-1 overflow-auto" style={{ height: "70%" }}>
+            <Editor
+              socketRef={socketRef}
+              roomId={roomId}
+              username={Location.state?.username}
+              onCodeChange={(code) => {
+                codeRef.current = code;
+              }}
+            />
+          </div>
+
+          {/* Output Terminal */}
+          <div className="bg-dark text-white p-3" style={{ height: "30%", borderTop: "2px solid #555", overflowY: "auto" }}>
+            <h6 className="text-secondary mb-2">Output Console</h6>
+            <pre style={{ whiteSpace: "pre-wrap", fontFamily: "monospace", fontSize: "14px" }}>
+              {output || "Run code to see output..."}
+            </pre>
+          </div>
+
         </div>
       </div>
     </div>

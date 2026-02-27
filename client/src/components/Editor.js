@@ -3,22 +3,27 @@ import "codemirror/mode/javascript/javascript";
 import "codemirror/theme/dracula.css";
 import "codemirror/addon/edit/closetag";
 import "codemirror/addon/edit/closebrackets";
+
+// Autocomplete Addons
+import "codemirror/addon/hint/show-hint.css";
+import "codemirror/addon/hint/show-hint";
+import "codemirror/addon/hint/javascript-hint";
+
+// Linting Addons
+import "codemirror/addon/lint/lint.css";
+import "codemirror/addon/lint/lint";
+import "codemirror/addon/lint/javascript-lint";
+import { JSHINT } from "jshint";
+
 import "codemirror/lib/codemirror.css";
 import CodeMirror from "codemirror";
 import { ACTIONS } from "../Actions";
 
+// Bind JSHINT to window so CodeMirror can access it
+window.JSHINT = JSHINT;
+
 const Editor = ({ socketRef, roomId, onCodeChange, username }) => {
   const editorRef = useRef(null);
-
-  // const handleHighlight = () => {
-  //   const { from, to } = editorRef.current.getSelection();
-  //   socketRef.current.emit(ACTIONS.TEXT_HIGHLIGHT, {
-  //     roomId,
-  //     from,
-  //     to,
-  //     // You can also include username or other metadata if needed
-  //   });
-  // };
 
   useEffect(() => {
     if (socketRef.current) {
@@ -32,7 +37,7 @@ const Editor = ({ socketRef, roomId, onCodeChange, username }) => {
         socketRef.current.off(ACTIONS.TEXT_HIGHLIGHT, handleTextHighlight);
       };
     }
-  }, [socketRef.current]);
+  }, [socketRef, roomId]);
 
   useEffect(() => {
     const initEditor = () => {
@@ -44,6 +49,9 @@ const Editor = ({ socketRef, roomId, onCodeChange, username }) => {
           autoCloseTags: true,
           autoCloseBrackets: true,
           lineNumbers: true,
+          extraKeys: { "Ctrl-Space": "autocomplete" },
+          gutters: ["CodeMirror-lint-markers"],
+          lint: true,
         }
       );
       editorRef.current = editor;
@@ -63,7 +71,7 @@ const Editor = ({ socketRef, roomId, onCodeChange, username }) => {
     };
 
     initEditor();
-  }, []);
+  }, [onCodeChange, roomId, socketRef]);
 
   useEffect(() => {
     if (socketRef.current) {
@@ -76,7 +84,7 @@ const Editor = ({ socketRef, roomId, onCodeChange, username }) => {
     return () => {
       socketRef.current.off(ACTIONS.CODE_CHANGE);
     };
-  }, [socketRef.current]);
+  }, [socketRef]);
 
   useEffect(() => {
     const editor = editorRef.current;
@@ -116,10 +124,10 @@ const Editor = ({ socketRef, roomId, onCodeChange, username }) => {
         }
       };
     }
-  }, [username, socketRef.current, roomId]);
+  }, [username, socketRef, roomId]);
 
   return (
-    <div style={{ height: "600px" }}>
+    <div style={{ height: "100%" }}>
       <textarea id="realtimeEditor"></textarea>
     </div>
   );
