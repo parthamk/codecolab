@@ -54,11 +54,11 @@ function getErrorHint(language, errorOutput, code) {
   }
 
   if (language.includes("openjdk")) {
-    if (!code.includes("public class Main")) return "💡 Java: Your class must be named `Main` in this environment (`public class Main { ... }`).";
+    if (!code.includes("public class Prog")) return "💡 Java: Your class must be named `prog` in this environment (`public class prog { ... }`).";
     if (e.includes("';' expected"))          return "💡 Java: Missing semicolon at the end of a statement.";
     if (e.includes("cannot find symbol"))    return "💡 Java: An identifier (variable/method) is not found. Check spelling and imports.";
     if (e.includes("reached end of file"))   return "💡 Java: Unexpected end of file — you may have unclosed `{` braces.";
-    return "💡 Java: Check for missing semicolons, unmatched braces, or that your class is named `Main`.";
+    return "💡 Java: Check for missing semicolons, unmatched braces, or that your class is named `prog`.";
   }
 
   if (language.includes("rust")) {
