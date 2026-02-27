@@ -11,7 +11,7 @@ const boilerplates = {
   "cpython-3.12.7":   '# Python\nprint("Hello, World!")',
   "gcc-13.2.0-c":     '// C\n#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}',
   "gcc-13.2.0":       '// C++\n#include <iostream>\n\nint main() {\n    std::cout << "Hello, World!" << std::endl;\n    return 0;\n}',
-  "openjdk-jdk-21+35":'// Java\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}',
+  "openjdk-jdk-21+35":'// Java\npublic class prog {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}',
   "rust-1.82.0":      '// Rust\nfn main() {\n    println!("Hello, World!");\n}',
 };
 
