@@ -440,24 +440,76 @@ body {
 }
 
 .editor-side-btn {
-  width: 100%;
+  width: 44px;
+  height: 44px;
   background: rgba(155, 48, 255, 0.1);
   border: 1px solid rgba(191, 95, 255, 0.2);
-  border-radius: 8px;
+  border-radius: 50%;
   color: var(--text-primary);
-  font-size: 0.65rem;
-  padding: 7px 2px;
   cursor: pointer;
-  text-align: center;
-  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  position: relative;
+  margin: 0 auto;
+}
+
+/* Tooltip implementation using pseudo elements */
+.editor-side-btn::before,
+.editor-side-btn::after {
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease-in-out;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Tooltip text bubble */
+.editor-side-btn::after {
+  content: attr(data-tooltip);
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-5px);
+  background: rgba(22, 10, 38, 0.96);
+  color: #fff;
+  border: 1px solid var(--purple-main);
+  border-radius: 6px;
+  padding: 6px 12px;
   font-family: var(--font-ui);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  box-shadow: 0 4px 15px rgba(155, 48, 255, 0.3);
+}
+
+/* Tooltip little arrow */
+.editor-side-btn::before {
+  content: "";
+  left: calc(100% + 7px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-5px);
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent var(--purple-main) transparent transparent;
+}
+
+.editor-side-btn:hover::before,
+.editor-side-btn:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(0);
 }
 
 .editor-side-btn--copy     { border-color: rgba(48, 207, 255, 0.3); color: #a0e8ff; }
 .editor-side-btn--download { border-color: rgba(48, 255, 144, 0.3); color: #90ffcc; }
 .editor-side-btn--leave    { border-color: rgba(255, 80, 80, 0.3);  color: #ffaaaa; }
 
-.editor-side-btn:hover { background: rgba(155, 48, 255, 0.2); }
+.editor-side-btn:hover { 
+  background: rgba(155, 48, 255, 0.2); 
+  transform: scale(1.05);
+}
 
 /* Editor area */
 .editor-area {
