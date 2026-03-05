@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Client, { getColorPair } from "./Client";
 import Editor from "./Editor";
 import { initSocket } from "../Socket";
@@ -81,6 +82,46 @@ function getInitials(name) {
   const words = name.trim().split(/\s+/);
   if (words.length === 1) return words[0].charAt(0).toLowerCase();
   return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toLowerCase();
+}
+
+function SidebarButton({ icon, tooltipText, onClick, className }) {
+  const [hovered, setHovered] = useState(false);
+  const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
+  const btnRef = useRef(null);
+
+  useEffect(() => {
+    if (hovered && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setTooltipPos({
+        top: rect.top + rect.height / 2,
+        left: rect.right + 10,
+      });
+    }
+  }, [hovered]);
+
+  const tooltip = hovered ? createPortal(
+    <div
+      className="client-tooltip"
+      style={{ top: tooltipPos.top, left: tooltipPos.left }}
+    >
+      {tooltipText}
+      <div className="client-tooltip-arrow" />
+    </div>,
+    document.body
+  ) : null;
+
+  return (
+    <button
+      ref={btnRef}
+      className={`editor-side-btn ${className}`}
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {icon}
+      {tooltip}
+    </button>
+  );
 }
 
 function EditorPage() {
@@ -204,30 +245,41 @@ function EditorPage() {
             {clients.map((c) => <Client key={c.socketId} username={c.username} />)}
           </div>
           <div className="editor-sidebar-actions">
-            <button
-              className="editor-side-btn editor-side-btn--copy"
-              data-tooltip="Copy ID"
+            <SidebarButton
+              className="editor-side-btn--copy"
+              tooltipText="Copy ID"
               onClick={() => { navigator.clipboard.writeText(roomId); toast.success("Room ID copied"); }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-              </svg>
-            </button>
-            <button className="editor-side-btn editor-side-btn--download" data-tooltip="Download Code" onClick={downloadCode}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-            </button>
-            <button className="editor-side-btn editor-side-btn--leave" data-tooltip="Leave Room" onClick={() => navigate("/")}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16 17 21 12 16 7"></polyline>
-                <line x1="21" y1="12" x2="9" y2="12"></line>
-              </svg>
-            </button>
+              icon={
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              }
+            />
+            <SidebarButton
+              className="editor-side-btn--download"
+              tooltipText="Download Code"
+              onClick={downloadCode}
+              icon={
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+              }
+            />
+            <SidebarButton
+              className="editor-side-btn--leave"
+              tooltipText="Leave Room"
+              onClick={() => navigate("/")}
+              icon={
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+              }
+            />
           </div>
         </div>
 

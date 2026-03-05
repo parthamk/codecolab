@@ -29,8 +29,17 @@ body {
    ANIMATIONS
 ───────────────────────────────────────────── */
 @keyframes pulse-orb {
-  0%, 100% { opacity: 0.18; transform: scale(1); }
-  50%       { opacity: 0.28; transform: scale(1.12); }
+
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.28;
+    transform: scale(1.12);
+  }
 }
 
 /* ─────────────────────────────────────────────
@@ -68,8 +77,19 @@ body {
   z-index: 0;
 }
 
-.home-orb--1 { top: 10%; left: 15%; animation-delay: 0s; }
-.home-orb--2 { top: 60%; right: 10%; animation-delay: 2s; width: 300px; height: 300px; }
+.home-orb--1 {
+  top: 10%;
+  left: 15%;
+  animation-delay: 0s;
+}
+
+.home-orb--2 {
+  top: 60%;
+  right: 10%;
+  animation-delay: 2s;
+  width: 300px;
+  height: 300px;
+}
 
 .home-container {
   position: relative;
@@ -84,7 +104,9 @@ body {
 }
 
 /* Hero */
-.home-hero { text-align: center; }
+.home-hero {
+  text-align: center;
+}
 
 .home-badge {
   display: inline-block;
@@ -154,7 +176,9 @@ body {
   font-family: var(--font-mono);
 }
 
-.home-input-group { margin-bottom: 14px; }
+.home-input-group {
+  margin-bottom: 14px;
+}
 
 .home-input {
   width: 100%;
@@ -170,7 +194,10 @@ body {
   transition: border-color 0.2s;
 }
 
-.home-input::placeholder { color: rgba(200, 180, 255, 0.4); }
+.home-input::placeholder {
+  color: rgba(200, 180, 255, 0.4);
+}
+
 .home-input:focus {
   outline: none;
   border-color: var(--purple-light);
@@ -213,10 +240,14 @@ body {
   transition: text-shadow 0.2s;
 }
 
-.home-new-room-link:hover { text-shadow: 0 0 10px var(--purple-light); }
+.home-new-room-link:hover {
+  text-shadow: 0 0 10px var(--purple-light);
+}
 
 /* FAQ / How to use */
-.home-faq-section { width: 100%; }
+.home-faq-section {
+  width: 100%;
+}
 
 .home-faq-title {
   font-family: var(--font-mono);
@@ -228,7 +259,9 @@ body {
   text-align: center;
 }
 
-.home-faq-item { margin-bottom: 10px; }
+.home-faq-item {
+  margin-bottom: 10px;
+}
 
 .home-faq-btn {
   width: 100%;
@@ -248,8 +281,13 @@ body {
   backdrop-filter: blur(10px);
 }
 
-.home-faq-btn:hover { border-color: var(--purple-light); }
-.home-faq-btn--open { border-color: var(--purple-main); }
+.home-faq-btn:hover {
+  border-color: var(--purple-light);
+}
+
+.home-faq-btn--open {
+  border-color: var(--purple-main);
+}
 
 .home-faq-arrow {
   color: var(--purple-main);
@@ -259,7 +297,9 @@ body {
   transition: transform 0.25s ease;
 }
 
-.home-faq-arrow--open { transform: rotate(180deg); }
+.home-faq-arrow--open {
+  transform: rotate(180deg);
+}
 
 .home-faq-answer {
   background: rgba(155, 48, 255, 0.07);
@@ -455,59 +495,23 @@ body {
   margin: 0 auto;
 }
 
-/* Tooltip implementation using pseudo elements */
-.editor-side-btn::before,
-.editor-side-btn::after {
-  position: fixed;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.2s ease-in-out;
-  pointer-events: none;
-  z-index: 9999;
+.editor-side-btn--copy {
+  border-color: rgba(48, 207, 255, 0.3);
+  color: #a0e8ff;
 }
 
-/* Tooltip text bubble */
-.editor-side-btn::after {
-  content: attr(data-tooltip);
-  left: calc(100% + 12px);
-  top: 50%;
-  transform: translateY(-50%) translateX(-5px);
-  background: rgba(22, 10, 38, 0.96);
-  color: #fff;
-  border: 1px solid var(--purple-main);
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-family: var(--font-ui);
-  font-size: 0.75rem;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-  box-shadow: 0 4px 15px rgba(155, 48, 255, 0.3);
+.editor-side-btn--download {
+  border-color: rgba(48, 255, 144, 0.3);
+  color: #90ffcc;
 }
 
-/* Tooltip little arrow */
-.editor-side-btn::before {
-  content: "";
-  left: calc(100% + 7px);
-  top: 50%;
-  transform: translateY(-50%) translateX(-5px);
-  border-width: 5px;
-  border-style: solid;
-  border-color: transparent var(--purple-main) transparent transparent;
+.editor-side-btn--leave {
+  border-color: rgba(255, 80, 80, 0.3);
+  color: #ffaaaa;
 }
 
-.editor-side-btn:hover::before,
-.editor-side-btn:hover::after {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(-50%) translateX(0);
-}
-
-.editor-side-btn--copy     { border-color: rgba(48, 207, 255, 0.3); color: #a0e8ff; }
-.editor-side-btn--download { border-color: rgba(48, 255, 144, 0.3); color: #90ffcc; }
-.editor-side-btn--leave    { border-color: rgba(255, 80, 80, 0.3);  color: #ffaaaa; }
-
-.editor-side-btn:hover { 
-  background: rgba(155, 48, 255, 0.2); 
+.editor-side-btn:hover {
+  background: rgba(155, 48, 255, 0.2);
   transform: scale(1.05);
 }
 
@@ -558,7 +562,10 @@ body {
   transition: opacity 0.2s;
 }
 
-.editor-run-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+.editor-run-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
 
 /* CodeMirror wrapper */
 .editor-cm-wrapper {
