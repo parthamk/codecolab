@@ -12,7 +12,7 @@ const NEON_COLORS = [
   ['#30a0ff', '#0060c0'],
 ];
 
-function getColorPair(name) {
+export function getColorPair(name) {
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);

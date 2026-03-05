@@ -68,6 +68,10 @@ io.on("connection", (socket) => {
     socket.in(roomId).emit(ACTIONS.CODE_CHANGE, { code });
   });
 
+  socket.on(ACTIONS.TYPING, ({ roomId, username, coords }) => {
+    socket.in(roomId).emit(ACTIONS.TYPING, { socketId: socket.id, username, coords });
+  });
+
   socket.on(ACTIONS.SYNC_CODE, ({ socketId, code }) => {
     io.to(socketId).emit(ACTIONS.CODE_CHANGE, { code });
   });

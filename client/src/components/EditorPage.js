@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import Client from "./Client";
+import Client, { getColorPair } from "./Client";
 import Editor from "./Editor";
 import { initSocket } from "../Socket";
 import { ACTIONS } from "../Actions";
@@ -7,65 +7,65 @@ import { useNavigate, useLocation, Navigate, useParams } from "react-router-dom"
 import { toast } from "react-hot-toast";
 
 const boilerplates = {
-  "nodejs-20.17.0":   '// JavaScript (Node.js)\nconsole.log("Hello, World!");',
-  "cpython-3.12.7":   '# Python\nprint("Hello, World!")',
-  "gcc-13.2.0-c":     '// C\n#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}',
-  "gcc-13.2.0":       '// C++\n#include <iostream>\n\nint main() {\n    std::cout << "Hello, World!" << std::endl;\n    return 0;\n}',
-  "openjdk-jdk-21+35":'// Java\npublic class prog {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}',
-  "rust-1.82.0":      '// Rust\nfn main() {\n    println!("Hello, World!");\n}',
+  "nodejs-20.17.0": '// JavaScript (Node.js)\nconsole.log("Hello, World!");',
+  "cpython-3.12.7": '# Python\nprint("Hello, World!")',
+  "gcc-13.2.0-c": '// C\n#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}',
+  "gcc-13.2.0": '// C++\n#include <iostream>\n\nint main() {\n    std::cout << "Hello, World!" << std::endl;\n    return 0;\n}',
+  "openjdk-jdk-21+35": '// Java\npublic class prog {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}',
+  "rust-1.82.0": '// Rust\nfn main() {\n    println!("Hello, World!");\n}',
 };
 
 function getErrorHint(language, errorOutput, code) {
   const e = errorOutput || "";
 
   if (language.includes("nodejs")) {
-    if (e.includes("SyntaxError"))        return "💡 JavaScript: Check for missing brackets, parentheses, or a stray comma.";
-    if (e.includes("ReferenceError"))     return "💡 JavaScript: A variable is used before it's declared. Check spelling or add `let`/`const`.";
-    if (e.includes("TypeError"))          return "💡 JavaScript: You may be calling a non-function or accessing a property of `null`/`undefined`.";
+    if (e.includes("SyntaxError")) return "💡 JavaScript: Check for missing brackets, parentheses, or a stray comma.";
+    if (e.includes("ReferenceError")) return "💡 JavaScript: A variable is used before it's declared. Check spelling or add `let`/`const`.";
+    if (e.includes("TypeError")) return "💡 JavaScript: You may be calling a non-function or accessing a property of `null`/`undefined`.";
     if (e.includes("Cannot find module")) return "💡 JavaScript: A required module is missing. Make sure all imports are correct.";
     return "💡 JavaScript: Check for missing semicolons, mismatched brackets, or undefined variables.";
   }
 
   if (language.includes("python")) {
-    if (e.includes("IndentationError"))   return "💡 Python: Fix indentation — Python relies on consistent spaces (not tabs mixed with spaces).";
-    if (e.includes("SyntaxError"))        return "💡 Python: Check colons after `def`/`if`/`for`, unclosed quotes, or mismatched parentheses.";
-    if (e.includes("NameError"))          return "💡 Python: A variable name isn't defined. Check for typos or missing imports.";
-    if (e.includes("TypeError"))          return "💡 Python: Type mismatch. Ensure you're not mixing incompatible types (e.g. str + int).";
+    if (e.includes("IndentationError")) return "💡 Python: Fix indentation — Python relies on consistent spaces (not tabs mixed with spaces).";
+    if (e.includes("SyntaxError")) return "💡 Python: Check colons after `def`/`if`/`for`, unclosed quotes, or mismatched parentheses.";
+    if (e.includes("NameError")) return "💡 Python: A variable name isn't defined. Check for typos or missing imports.";
+    if (e.includes("TypeError")) return "💡 Python: Type mismatch. Ensure you're not mixing incompatible types (e.g. str + int).";
     if (e.includes("ImportError") || e.includes("ModuleNotFoundError"))
-                                          return "💡 Python: Module not found. Confirm the module name and that it's available in this environment.";
+      return "💡 Python: Module not found. Confirm the module name and that it's available in this environment.";
     return "💡 Python: Review your code for indentation, syntax, or logic issues.";
   }
 
   if (language === "gcc-13.2.0-c") {
-    if (e.includes("undeclared"))          return "💡 C: Variable used without declaration. Declare it before use (e.g. `int x;`).";
+    if (e.includes("undeclared")) return "💡 C: Variable used without declaration. Declare it before use (e.g. `int x;`).";
     if (e.includes("missing ';'") || e.includes("expected ';'"))
-                                           return "💡 C: Missing semicolon at end of a statement.";
-    if (e.includes("main"))                return "💡 C: Make sure you have `int main()` defined as the entry point.";
+      return "💡 C: Missing semicolon at end of a statement.";
+    if (e.includes("main")) return "💡 C: Make sure you have `int main()` defined as the entry point.";
     if (e.includes("implicit declaration")) return "💡 C: Include the correct header file (e.g. `#include <stdio.h>`).";
     return "💡 C: Check for missing semicolons, undeclared variables, or missing `#include` headers.";
   }
 
   if (language === "gcc-13.2.0") {
-    if (e.includes("was not declared"))    return "💡 C++: Variable or function not declared in this scope.";
+    if (e.includes("was not declared")) return "💡 C++: Variable or function not declared in this scope.";
     if (e.includes("no match for 'operator'")) return "💡 C++: Operator type mismatch. Ensure operand types are compatible.";
-    if (e.includes("main"))                return "💡 C++: Ensure `int main()` exists as the entry point.";
-    if (e.includes("linker"))              return "💡 C++: Linker error — a function is declared but not defined, or you're missing a library.";
+    if (e.includes("main")) return "💡 C++: Ensure `int main()` exists as the entry point.";
+    if (e.includes("linker")) return "💡 C++: Linker error — a function is declared but not defined, or you're missing a library.";
     return "💡 C++: Check for undeclared variables, type mismatches, or missing `#include` statements.";
   }
 
   if (language.includes("openjdk")) {
     if (!code.includes("public class Prog")) return "💡 Java: Your class must be named `prog` in this environment (`public class prog { ... }`).";
-    if (e.includes("';' expected"))          return "💡 Java: Missing semicolon at the end of a statement.";
-    if (e.includes("cannot find symbol"))    return "💡 Java: An identifier (variable/method) is not found. Check spelling and imports.";
-    if (e.includes("reached end of file"))   return "💡 Java: Unexpected end of file — you may have unclosed `{` braces.";
+    if (e.includes("';' expected")) return "💡 Java: Missing semicolon at the end of a statement.";
+    if (e.includes("cannot find symbol")) return "💡 Java: An identifier (variable/method) is not found. Check spelling and imports.";
+    if (e.includes("reached end of file")) return "💡 Java: Unexpected end of file — you may have unclosed `{` braces.";
     return "💡 Java: Check for missing semicolons, unmatched braces, or that your class is named `prog`.";
   }
 
   if (language.includes("rust")) {
-    if (e.includes("expected"))          return "💡 Rust: Syntax error. Check semicolons, braces, and `fn` signatures.";
+    if (e.includes("expected")) return "💡 Rust: Syntax error. Check semicolons, braces, and `fn` signatures.";
     if (e.includes("cannot find value")) return "💡 Rust: Variable not found. Make sure it's declared with `let`.";
-    if (e.includes("borrow"))            return "💡 Rust: Borrow checker issue. Review ownership and borrowing rules.";
-    if (e.includes("mismatched types"))  return "💡 Rust: Type mismatch. Ensure function return types and variable types align.";
+    if (e.includes("borrow")) return "💡 Rust: Borrow checker issue. Review ownership and borrowing rules.";
+    if (e.includes("mismatched types")) return "💡 Rust: Type mismatch. Ensure function return types and variable types align.";
     return "💡 Rust: Review ownership, semicolons, and function signatures.";
   }
 
@@ -76,18 +76,26 @@ function getErrorHint(language, errorOutput, code) {
   return "💡 Check your syntax, logic, and that your code compiles for the selected language.";
 }
 
-function EditorPage() {
-  const [clients, setClients]           = useState([]);
-  const [output, setOutput]             = useState("");
-  const [isCompiling, setIsCompiling]   = useState(false);
-  const [language, setLanguage]         = useState("nodejs-20.17.0");
-  const [showWarning, setShowWarning]   = useState(true);
+function getInitials(name) {
+  if (!name) return "?";
+  const words = name.trim().split(/\s+/);
+  if (words.length === 1) return words[0].charAt(0).toLowerCase();
+  return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toLowerCase();
+}
 
-  const codeRef   = useRef(boilerplates["nodejs-20.17.0"]);
+function EditorPage() {
+  const [clients, setClients] = useState([]);
+  const [output, setOutput] = useState("");
+  const [isCompiling, setIsCompiling] = useState(false);
+  const [language, setLanguage] = useState("nodejs-20.17.0");
+  const [showWarning, setShowWarning] = useState(true);
+  const [typingUsers, setTypingUsers] = useState({});
+
+  const codeRef = useRef(boilerplates["nodejs-20.17.0"]);
   const socketRef = useRef(null);
-  const { roomId }  = useParams();
-  const Location    = useLocation();
-  const navigate    = useNavigate();
+  const { roomId } = useParams();
+  const Location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const init = async () => {
@@ -103,6 +111,25 @@ function EditorPage() {
       socketRef.current.on(ACTIONS.DISCONNECTED, ({ username, socketId }) => {
         toast.success(`${username} left.`);
         setClients((prev) => prev.filter((c) => c.socketId !== socketId));
+      });
+
+      socketRef.current.on(ACTIONS.TYPING, ({ socketId, username, coords }) => {
+        setTypingUsers((prev) => {
+          const newState = { ...prev };
+          if (newState[socketId]?.timeoutId) clearTimeout(newState[socketId].timeoutId);
+          newState[socketId] = {
+            username,
+            coords,
+            timeoutId: setTimeout(() => {
+              setTypingUsers((current) => {
+                const next = { ...current };
+                delete next[socketId];
+                return next;
+              });
+            }, 2000),
+          };
+          return newState;
+        });
       });
     };
     init();
@@ -231,6 +258,36 @@ function EditorPage() {
           </div>
         </div>
       </div>
+
+      {/* Render Typing Indicators */}
+      {Object.entries(typingUsers).map(([socketId, data]) => {
+        const initials = getInitials(data.username);
+        const [from, to] = getColorPair(data.username);
+        return (
+          <div
+            key={socketId}
+            className="remote-typing-indicator"
+            style={{
+              position: "fixed",
+              top: data.coords.top,
+              left: data.coords.right || data.coords.left,
+              transform: "translate(4px, -100%)",
+              background: `linear-gradient(135deg, ${from}, ${to})`,
+              color: "#fff",
+              padding: "2px 6px",
+              borderRadius: "4px",
+              fontSize: "0.75rem",
+              zIndex: 9999,
+              pointerEvents: "none",
+              boxShadow: `0 2px 10px ${from}80`,
+              fontFamily: "var(--font-ui)",
+              whiteSpace: "nowrap"
+            }}
+          >
+            {initials} is typing...
+          </div>
+        );
+      })}
     </div>
   );
 }

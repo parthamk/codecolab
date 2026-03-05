@@ -9,4 +9,5 @@ export const ACTIONS = {
   LEAVE: "leave",
   CURSOR_ACTIVITY: "cursor-activity",
   TEXT_HIGHLIGHT: "text-highlight",
+  TYPING: "typing",
 };

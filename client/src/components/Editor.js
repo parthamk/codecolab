@@ -21,27 +21,27 @@ import "codemirror/addon/lint/javascript-lint";
 import { ACTIONS } from "../Actions";
 
 const boilerplates = {
-  "nodejs-20.17.0":    '// JavaScript (Node.js)\nconsole.log("Hello, World!");',
-  "cpython-3.12.7":    '# Python\nprint("Hello, World!")',
-  "gcc-13.2.0-c":      '// C\n#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}',
-  "gcc-13.2.0":        '// C++\n#include <iostream>\n\nint main() {\n    std::cout << "Hello, World!" << std::endl;\n    return 0;\n}',
+  "nodejs-20.17.0": '// JavaScript (Node.js)\nconsole.log("Hello, World!");',
+  "cpython-3.12.7": '# Python\nprint("Hello, World!")',
+  "gcc-13.2.0-c": '// C\n#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}',
+  "gcc-13.2.0": '// C++\n#include <iostream>\n\nint main() {\n    std::cout << "Hello, World!" << std::endl;\n    return 0;\n}',
   "openjdk-jdk-21+35": '// Java\npublic class prog {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}',
-  "rust-1.82.0":       '// Rust\nfn main() {\n    println!("Hello, World!");\n}',
+  "rust-1.82.0": '// Rust\nfn main() {\n    println!("Hello, World!");\n}',
 };
 
 const getMode = (lang) => {
-  if (lang.includes("nodejs"))  return "javascript";
-  if (lang.includes("python"))  return "python";
-  if (lang === "gcc-13.2.0-c")  return "text/x-csrc";
-  if (lang === "gcc-13.2.0")    return "text/x-c++src";
+  if (lang.includes("nodejs")) return "javascript";
+  if (lang.includes("python")) return "python";
+  if (lang === "gcc-13.2.0-c") return "text/x-csrc";
+  if (lang === "gcc-13.2.0") return "text/x-c++src";
   if (lang.includes("openjdk")) return "text/x-java";
-  if (lang.includes("rust"))    return "rust";
+  if (lang.includes("rust")) return "rust";
   return "javascript";
 };
 
-const Editor = ({ socketRef, roomId, onCodeChange, language }) => {
-  const editorRef      = useRef(null);
-  const prevLangRef    = useRef(language);
+const Editor = ({ socketRef, roomId, username, onCodeChange, language }) => {
+  const editorRef = useRef(null);
+  const prevLangRef = useRef(language);
 
   // Initialize once
   useEffect(() => {
@@ -69,6 +69,9 @@ const Editor = ({ socketRef, roomId, onCodeChange, language }) => {
       onCodeChange(code);
       if (changes.origin !== "setValue") {
         socketRef.current.emit(ACTIONS.CODE_CHANGE, { roomId, code });
+
+        const coords = instance.cursorCoords(true, "window");
+        socketRef.current.emit(ACTIONS.TYPING, { roomId, username, coords });
       }
     });
   }, []); // eslint-disable-line
