@@ -101,11 +101,11 @@ function SidebarButton({ icon, tooltipText, onClick, className }) {
 
   const tooltip = hovered ? createPortal(
     <div
-      className="client-tooltip"
+      className="floating-tooltip"
       style={{ top: tooltipPos.top, left: tooltipPos.left }}
     >
       {tooltipText}
-      <div className="client-tooltip-arrow" />
+      <div className="floating-tooltip-arrow" />
     </div>,
     document.body
   ) : null;

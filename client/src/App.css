@@ -346,10 +346,12 @@ body {
   transition: box-shadow 0.2s;
 }
 
-.client-tooltip {
+/* ─────────────────────────────────────────────
+   GLOBAL FLOATING TOOLTIP
+───────────────────────────────────────────── */
+.floating-tooltip {
   /* Rendered via React portal into document.body */
   position: fixed;
-
   transform: translateY(-50%);
   background: rgba(22, 10, 38, 0.97);
   border: 1px solid rgba(191, 95, 255, 0.4);
@@ -364,7 +366,7 @@ body {
   font-family: var(--font-ui);
 }
 
-.client-tooltip-arrow {
+.floating-tooltip-arrow {
   position: fixed;
   left: -6px;
   top: 50%;
