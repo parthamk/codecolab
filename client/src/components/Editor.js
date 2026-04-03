@@ -105,8 +105,9 @@ const Editor = ({ socketRef, roomId, username, onCodeChange, language }) => {
         editorRef.current.setValue(code);
       }
     });
-    return () => socketRef.current?.off(ACTIONS.CODE_CHANGE);
-  }, [socketRef.current]);
+    const socket = socketRef.current;
+    return () => socket?.off(ACTIONS.CODE_CHANGE);
+  }, [socketRef]);
 
   return (
     <div style={{ height: "100%" }}>
