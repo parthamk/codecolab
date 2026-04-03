@@ -24,6 +24,11 @@ const io = new Server(server, {
   },
 });
 
+// Health check / UptimeRobot endpoint
+app.get("/", (req, res) => {
+  res.status(200).send("Server is live and running");
+});
+
 // Execute endpoint — compiler keys are sent directly from frontend and must
 // exactly match Wandbox's compiler names from /api/list.json
 app.post("/execute", async (req, res) => {
