@@ -107,7 +107,8 @@ const Editor = ({ socketRef, roomId, username, onCodeChange, language }) => {
     });
     const socket = socketRef.current;
     return () => socket?.off(ACTIONS.CODE_CHANGE);
-  }, [socketRef]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socketRef.current]);
 
   return (
     <div style={{ height: "100%" }}>
