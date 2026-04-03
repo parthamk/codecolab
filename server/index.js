@@ -5,8 +5,13 @@ const { Server } = require("socket.io");
 const ACTIONS = require("./Actions");
 const cors = require("cors");
 
+const allowedOrigins = [
+  "https://realtimecodecolab.onrender.com",
+  "https://codecolab.codeweez.in"
+];
+
 app.use(cors({
-  origin: "https://realtimecodecolab.onrender.com",
+  origin: allowedOrigins,
   methods: ["GET", "POST"]
 }));
 app.use(express.json());
@@ -14,7 +19,7 @@ app.use(express.json());
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "https://realtimecodecolab.onrender.com",
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
   },
 });
