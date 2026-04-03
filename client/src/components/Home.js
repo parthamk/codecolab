@@ -129,7 +129,7 @@ function Home() {
           ))}
         </div>
 
-        <p className="home-footer">© 2025 CodeColab · Built for real-time devs</p>
+        <p className="home-footer">© 2026-2027 CodeColab · Built for real-time devs</p>
       </div>
     </div>
   );
