@@ -549,6 +549,12 @@ body {
   cursor: pointer;
 }
 
+.editor-refresh-btn:hover {
+  color: #f1c40f !important; /* Yellow hover to match Run button theme */
+  transform: rotate(20deg);
+  transition: all 0.2s ease;
+}
+
 .editor-run-btn {
   background: linear-gradient(135deg, var(--purple-main), #6010d0);
   border: none;

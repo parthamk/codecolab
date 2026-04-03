@@ -76,6 +76,21 @@ const Editor = ({ socketRef, roomId, username, onCodeChange, language }) => {
     });
   }, []); // eslint-disable-line
 
+  // Refresh Session
+
+  const refreshSession = () => {
+  if (socketRef.current) {
+    // Re-emit JOIN to refresh the user list and sync state on the server
+    socketRef.current.emit(ACTIONS.JOIN, {
+      roomId,
+      username: Location.state?.username,
+    });
+    toast.success("Session refreshed successfully");
+  } else {
+    toast.error("Socket connection not found. Try refreshing the page.");
+  }
+};
+
   // React to language change
   useEffect(() => {
     if (!editorRef.current || prevLangRef.current === language) return;
